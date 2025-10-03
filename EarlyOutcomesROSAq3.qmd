@@ -165,6 +165,8 @@ The environment was prepared by loading the required packages in advance; confir
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(# Load required packages
+  "mets",
+  "adjustedCurves",
   "googlesheets4",
   "readxl",
   "tidyverse",
@@ -496,6 +498,50 @@ Hospital4 <- Hospital3a %>% mutate(
 ### SHARKS Snapshot and Export
 
 A registry snapshot from SHARKS was retrieved (date 16-Nov-2023) and imported as described above. The SHARKS registry is a clinical quality registry embedded in the department of orthopaedics, with contributions from the physiotherapy department [@Lee2020], registered on the ANZ clinical trials register (ACTRN12617001161314) and with appropriate HREC approval (HREC/16/QPAH/732) for the collection of patient-reported outcomes and contextual information (pathology, patient characteristics, treatment) for knee arthroplasty within the hospital. The SHARKS registry snapshot was read in the method described above.
+
+
+A function was generated to retrieve files using the *googledrive* package, to call on later in the analysis for processing data imports.
+
+```{r}
+#| label: folder
+#| echo: false
+
+base_folder_id1 <- "10PC4-TOygmM55QyC3GDjZ3EiYtO1akFw"
+
+
+```
+
+```{r}
+get_specific_snapshot <- function(folder_name, base_folder_id = base_folder_id1) {
+  tryCatch({
+    # Check if the folder exists in the base directory
+    folder <- googledrive::drive_ls(as_id(base_folder_id), pattern = paste0("^", folder_name, "$"))
+    
+    if(nrow(folder) == 0) {
+      stop(paste("Folder", folder_name, "not found"))
+    }
+    
+    # Find the snapshot file in the specified folder
+    snapshot_file <- googledrive::drive_ls(
+      folder$id, 
+      pattern = "Registry data snapshot\\.xlsx$"
+    )
+    
+    if(nrow(snapshot_file) == 0) {
+      stop("No snapshot file found in specified folder")
+    }
+    
+    # Return both pieces of information as a list
+    return(list(
+      snapshot = snapshot_file,
+      folder_name = folder$name
+    ))
+    
+  }, error = function(e) {
+    stop(paste("Error finding specified snapshot:", e$message))
+  })
+}
+```
 
 ```{r}
 #| lable: snapshot-setup
