@@ -5123,6 +5123,39 @@
         "Archs": "x64"
       }
     },
+    "openxlsx2": {
+      "Source": "CRAN",
+      "Repository": "https://cran.csiro.au",
+      "description": {
+        "Type": "Package",
+        "Package": "openxlsx2",
+        "Title": "Read, Write and Edit 'xlsx' Files",
+        "Version": "1.20",
+        "Language": "en-US",
+        "Authors@R": "c(\n  person(\"Jordan Mark\", \"Barbone\", email = \"jmbarbone@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0001-9788-3628\")),\n  person(\"Jan Marvin\", \"Garbuszus\", email = \"jan.garbuszus@ruhr-uni-bochum.de\", role = c(\"aut\", \"cre\")),\n  person(\"Olivier\", \"Roy\", role = \"ctb\"),\n  person(family = \"openxlsx authors\", role = \"cph\", comment = \"openxlsx package\"),\n  person(\"Arseny\", \"Kapoulkine\", role = c(\"ctb\", \"cph\"), comment = \"Author of included pugixml code\")\n  )",
+        "Description": "Simplifies the creation of 'xlsx' files by\n    providing a high level interface to writing, styling and editing\n    worksheets.",
+        "License": "MIT + file LICENSE",
+        "URL": "https://janmarvin.github.io/openxlsx2/,\nhttps://github.com/JanMarvin/openxlsx2",
+        "BugReports": "https://github.com/JanMarvin/openxlsx2/issues",
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "R6, Rcpp, grDevices, stringi, utils, zip",
+        "LinkingTo": "Rcpp",
+        "Suggests": "ggplot2, knitr, mschart (>= 0.4), rmarkdown, rvg, testthat\n(>= 3.0.0), waldo",
+        "VignetteBuilder": "knitr",
+        "Encoding": "UTF-8",
+        "RoxygenNote": "7.3.3",
+        "Config/testthat/edition": "3",
+        "Config/testthat/parallel": "true",
+        "NeedsCompilation": "yes",
+        "Packaged": "2025-09-29 11:21:12 UTC; janmarvingarbuszus",
+        "Author": "Jordan Mark Barbone [aut] (ORCID:\n    <https://orcid.org/0000-0001-9788-3628>),\n  Jan Marvin Garbuszus [aut, cre],\n  Olivier Roy [ctb],\n  openxlsx authors [cph] (openxlsx package),\n  Arseny Kapoulkine [ctb, cph] (Author of included pugixml code)",
+        "Maintainer": "Jan Marvin Garbuszus <jan.garbuszus@ruhr-uni-bochum.de>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-09-29 12:20:02 UTC",
+        "Built": "R 4.4.2; x86_64-w64-mingw32; 2025-09-29 22:32:13 UTC; windows",
+        "Archs": "x64"
+      }
+    },
     "ordinal": {
       "Source": "CRAN",
       "Repository": "https://cran.csiro.au",
@@ -8086,10 +8119,10 @@
   },
   "files": {
     ".RData": {
-      "checksum": "dfd1026ac68791293201cefa3658b2fb"
+      "checksum": "1eceb1134227d4bb9c06484bc05500bd"
     },
     ".secrets/c13dc354db9600c8cd9b2bd868d1bf25_cscholes@ebma.com.au": {
-      "checksum": "297f4b5532fb2e01e255404594a6d10b"
+      "checksum": "e52ed215c90ce43e93b81641776c6644"
     },
     "_quarto.yml": {
       "checksum": "58eb0b797a13c204188d5d3a00ed7b85"
@@ -8098,268 +8131,19 @@
       "checksum": "c5e4f9bc271b370bb4027cfd643470d4"
     },
     "EarlyOutcomesROSAq3.docx": {
-      "checksum": "81e409e888935b38e227634c2e27718f"
-    },
-    "EarlyOutcomesROSAq3.html": {
-      "checksum": "fffb1c5ee6c2405c6aef547f85cd6ffd"
+      "checksum": "ca59d6bceb8dc243c30e6b010e0079fa"
     },
     "EarlyOutcomesROSAq3.qmd": {
-      "checksum": "89995eecaa59bd1c5f88582b400f2b7c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-allcause-1.png": {
-      "checksum": "6673e225663a4d181fbfa6dc84cec535"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-infect-1.png": {
-      "checksum": "0950a39652c12906d376d75e3361b3e2"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-stiffness-1.png": {
-      "checksum": "2d30af716fb71f85e98bf7517777e307"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-vte-1.png": {
-      "checksum": "e2555287e4117073372497452dedd709"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjustcurve1-1.png": {
-      "checksum": "250d592376abd32df99528f1ff8cc379"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adjustcurve2-1.png": {
-      "checksum": "c9242d066978403499f3717fc85aa62b"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-adverse-coxph-1.png": {
-      "checksum": "413da57bba970ca0bbf48377d84e3ceb"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-bmi-spline-1.png": {
-      "checksum": "d94c9e941ea1a70a160aff616eb79c0e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-complicfreq-1.png": {
-      "checksum": "b3d5facefe694e98eb9e63371aba3ca7"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-complicfreq2-1.png": {
-      "checksum": "2c07ac892f6252a115d59c8d38b9a20a"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-adjust-1.png": {
-      "checksum": "8c2025e38d14dd5e04ee452367dde542"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-allcause-1.png": {
-      "checksum": "31fc96481f1a71ea48b19dd3159be35e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-infect-1.png": {
-      "checksum": "83c32f2b91a5e7e2738d7d0205a555ad"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-minadjust-1.png": {
-      "checksum": "7deb98c15a48ab7396d40a8b3cedbb53"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-stiffness-1.png": {
-      "checksum": "198092a61bf5cd32b26eb8c3393f677c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-vte-1.png": {
-      "checksum": "ba32d04a7aa25b502f84b616832e81b5"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-1.png": {
-      "checksum": "b59e8fe89b775c3708a2fecd1e906d96"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-dist-1.png": {
-      "checksum": "5ef53223047bdc8ec4d484db3c0a0e25"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-predict-1.png": {
-      "checksum": "44c4f87c08c34c0bc9cd4f76abe6495d"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-duration2-1.png": {
-      "checksum": "babaffe28d290a786ccd28fb7442feab"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-gamma-comp-1.png": {
-      "checksum": "b721afe8e3fd0dfe9de2702d68a68312"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-gamma-comp-residuals-1.png": {
-      "checksum": "5fb5c9c5cc2924a1c9d53fccfa0bf66b"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-keyvar-avail-1.png": {
-      "checksum": "6cc0923e5ab3f79265859abd93d53b84"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-missing-1.png": {
-      "checksum": "595e70f78990c9d62c2d22c1d19ca082"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/fig-strobeflow-1.png": {
-      "checksum": "2c4e011707b95c77f7a6b7ea35533079"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-14-1.png": {
-      "checksum": "5ac5dede404af7aba04e890a95ebdfd2"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-17-1.png": {
-      "checksum": "595e70f78990c9d62c2d22c1d19ca082"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-29-1.png": {
-      "checksum": "b3d5facefe694e98eb9e63371aba3ca7"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-30-1.png": {
-      "checksum": "827666aa3b933e741088f08d38987bd6"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-32-1.png": {
-      "checksum": "b3d5facefe694e98eb9e63371aba3ca7"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-33-1.png": {
-      "checksum": "9440987296b3f90d88052819786e7e0d"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-41-1.png": {
-      "checksum": "7972f11801b20857fc1f0e58dc0ceaf8"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-41-2.png": {
-      "checksum": "53b8b4c922b0ccb02c16abbbe1512959"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-44-1.png": {
-      "checksum": "bc32ff10634e9dc2999d59a8c8d4f4e6"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-45-1.png": {
-      "checksum": "6cc0923e5ab3f79265859abd93d53b84"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-50-1.png": {
-      "checksum": "8c2025e38d14dd5e04ee452367dde542"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-51-1.png": {
-      "checksum": "06de255ecb1c2c7904e2541647d7c464"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-52-1.png": {
-      "checksum": "7dfcd45698f379aecf61f3d978001ca7"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-53-1.png": {
-      "checksum": "83c32f2b91a5e7e2738d7d0205a555ad"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-54-1.png": {
-      "checksum": "d0d2f64192b387c5a635d1ec65ffef97"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-55-1.png": {
-      "checksum": "ba32d04a7aa25b502f84b616832e81b5"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-56-1.png": {
-      "checksum": "5297b29bac742f43c67e62c492bd19bd"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-57-1.png": {
-      "checksum": "198092a61bf5cd32b26eb8c3393f677c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-58-1.png": {
-      "checksum": "1329bc8dcbf8da5bd300ee9ddd15decc"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-59-1.png": {
-      "checksum": "31fc96481f1a71ea48b19dd3159be35e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-60-1.png": {
-      "checksum": "bad389ac081bba1b54f31bb99da756f3"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-61-1.png": {
-      "checksum": "5276d83c13c0ae6127aab1ec033bf84d"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-62-1.png": {
-      "checksum": "31fc96481f1a71ea48b19dd3159be35e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-63-1.png": {
-      "checksum": "b6923f865c5789ac3eed9041b087edbc"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-68-1.png": {
-      "checksum": "1afea232d8a583153e0169981a2e9485"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-71-1.png": {
-      "checksum": "2f057616a373b65985859f839e751812"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-72-1.png": {
-      "checksum": "2f057616a373b65985859f839e751812"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-73-1.png": {
-      "checksum": "b59e8fe89b775c3708a2fecd1e906d96"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-74-1.png": {
-      "checksum": "babaffe28d290a786ccd28fb7442feab"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-74-2.png": {
-      "checksum": "2885906348ebd0f707bd12307df344a4"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-75-1.png": {
-      "checksum": "61b03480f9e985a5ae25600c2c268e9c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-77-1.png": {
-      "checksum": "61b03480f9e985a5ae25600c2c268e9c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-82-1.png": {
-      "checksum": "3413b5b4d0efdf0d5cd38b56e2841625"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-83-1.png": {
-      "checksum": "d94c9e941ea1a70a160aff616eb79c0e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-84-1.png": {
-      "checksum": "3413b5b4d0efdf0d5cd38b56e2841625"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-85-1.png": {
-      "checksum": "d94c9e941ea1a70a160aff616eb79c0e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-86-1.png": {
-      "checksum": "fe7e17d24eb25f83faf675d1a03e7ef0"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-87-1.png": {
-      "checksum": "96a18dec8eb9b1c4180b24882bf1040e"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-88-1.png": {
-      "checksum": "fe7e17d24eb25f83faf675d1a03e7ef0"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-92-1.png": {
-      "checksum": "b134c2519b29df1a564ff25c3afef278"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-93-1.png": {
-      "checksum": "96fbd768f34b37e0be182334218b934c"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-94-1.png": {
-      "checksum": "b134c2519b29df1a564ff25c3afef278"
-    },
-    "EarlyOutcomesROSAq3_files/figure-html/unnamed-chunk-95-1.png": {
-      "checksum": "5fb5c9c5cc2924a1c9d53fccfa0bf66b"
-    },
-    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap-icons.css": {
-      "checksum": "7b398b1069853b0425186226963a7aad"
-    },
-    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap-icons.woff": {
-      "checksum": "1a51dfbe5467607389d603c02a77cd10"
-    },
-    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap.min.css": {
-      "checksum": "6af7fe331e124e9a3628ff5072715d11"
-    },
-    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap.min.js": {
-      "checksum": "13e7cde0b66bf81424927231819f2616"
-    },
-    "EarlyOutcomesROSAq3_files/libs/clipboard/clipboard.min.js": {
-      "checksum": "722242f7b6e0fa3b8d25070388a5c826"
-    },
-    "EarlyOutcomesROSAq3_files/libs/pagedtable-1.1/css/pagedtable.css": {
-      "checksum": "7773d8ddc5fe6c5adbde2349b933127f"
-    },
-    "EarlyOutcomesROSAq3_files/libs/pagedtable-1.1/js/pagedtable.js": {
-      "checksum": "8b657fbd2add193c16394a3f8339d3cf"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/anchor.min.js": {
-      "checksum": "1d0d5a0fbdee0fe4cad01b18ca781d13"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/popper.min.js": {
-      "checksum": "c04c707933aaedbb017737dfe0a0de7f"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/quarto-syntax-highlighting.css": {
-      "checksum": "4d4cc9cb11bfceb525fe29efe28849b8"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/quarto.js": {
-      "checksum": "fa9ec11d1c69dc53ca056e8b8d84bec6"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/tippy.css": {
-      "checksum": "ebd6f8ce46a677e1a4f5f8a8317109a9"
-    },
-    "EarlyOutcomesROSAq3_files/libs/quarto-html/tippy.umd.min.js": {
-      "checksum": "c767a9ffc932cac8690dd2e0321a121d"
-    },
-    "EarlyOutcomesROSAq3_files/libs/tabwid-1.1.3/tabwid.css": {
-      "checksum": "d437ce2bfe7051efe499172acb799f29"
-    },
-    "EarlyOutcomesROSAq3_files/libs/tabwid-1.1.3/tabwid.js": {
-      "checksum": "cd143f89d17ebc75a4f64885def2b8d4"
+      "checksum": "d1191cb683e50dc0f8e8b60bb6959b3d"
     },
     "grateful-refs.bib": {
-      "checksum": "229088a708a772663bab735ff9ed1902"
+      "checksum": "140dfae97904c8a110500f09e1fafee9"
     },
-    "images/QEII_SVRpart2_ROSA Comparison.png": {
-      "checksum": "26cb268c35d875f5334406086c158b60"
+    "LICENSE": {
+      "checksum": "3a3f3cea56febea828890847e3cb11d7"
+    },
+    "README.md": {
+      "checksum": "bd5719a0e96b0234c492057afaaca99b"
     }
   },
   "users": null

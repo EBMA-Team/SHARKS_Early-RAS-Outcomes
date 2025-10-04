@@ -1,5 +1,5 @@
 ---
-title: "A comparison of the clinical utility and cost metrics before and after the introduction of a robotic system (ROSA, Zimmer Biomet) into total knee arthroplasty in a public hospital"
+title: "Robotic-Assisted Total Knee Arthroplasty Does Not Increase Procedure Duration or Adverse Event Incidence: A Retrospective Comparative Cohort Study in a Secondary Public Teaching Hospital"
 author: "Corey Scholes"
 type: "website"
 number-sections: true
@@ -165,6 +165,7 @@ The environment was prepared by loading the required packages in advance; confir
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(# Load required packages
+  "googledrive",
   "mets",
   "adjustedCurves",
   "googlesheets4",
@@ -255,6 +256,71 @@ SheetIDs <- list(
 
 ## Processing functions
 
+
+```{r}
+#| label: file-retrieval-prep
+#| echo: false
+
+
+CurrentDate <- as.character("20231116")
+CurrentDate2 <- as.character("2024-06-11")
+
+FolderIDs <- list(
+  Folder1 = "1K6g9OFP44xXWwhA_34xjXY0Lvw6lqYrH",
+  Folder2 = "10PC4-TOygmM55QyC3GDjZ3EiYtO1akFw",
+  Folder3 = "1H5NZyPZZB4C98wZSqW4esxlPamMa7ZU7",
+  Folder4 = "1rDwDRFYHfWxQ7P-LAUfiNFG3vzKxxxI2"
+)
+
+```
+
+
+
+```{r}
+#| label: retrieve-files-func
+
+
+get_file_from_folder <- function(folder_name, 
+                                  file_pattern,
+                                  base_folder_id) {
+  tryCatch({
+    # Check if the folder exists in the base directory
+    folder <- googledrive::drive_ls(
+      googledrive::as_id(base_folder_id), 
+      pattern = paste0("^", folder_name, "$")
+    )
+    
+    if(nrow(folder) == 0) {
+      stop(paste("Folder", folder_name, "not found"))
+    }
+    
+    # Find the file in the specified folder
+    target_file <- googledrive::drive_ls(
+      folder$id, 
+      pattern = file_pattern
+    )
+    
+    if(nrow(target_file) == 0) {
+      stop(paste("No file matching pattern", file_pattern, "found in", folder_name))
+    }
+    
+    if(nrow(target_file) > 1) {
+      warning(paste("Multiple files found matching pattern. Returning first match."))
+    }
+    
+    # Return file info and folder name
+    return(list(
+      file = target_file[1, ],
+      folder_name = folder$name
+    ))
+    
+  }, error = function(e) {
+    stop(paste("Error finding file:", e$message))
+  })
+}
+```
+
+
 ```{r}
 process_gdrive_hospital_files <- function(folder_id) {
   # Create temp directory
@@ -265,7 +331,7 @@ process_gdrive_hospital_files <- function(folder_id) {
   tryCatch({
     # Get list of .xls files from folder
     cat("Fetching file list from Drive...\n")
-    drive_files <- googledrive::drive_ls(googledrive::as_id(folder_id)) %>%
+    drive_files <- googledrive::drive_ls(googledrive::as_id(folder_id)) |>
       dplyr::filter(stringr::str_detect(name, "\\.xls$"))
     
     if (nrow(drive_files) == 0) {
@@ -292,7 +358,7 @@ process_gdrive_hospital_files <- function(folder_id) {
       path = download_dir,
       pattern = "\\.xls$", 
       full.names = TRUE
-    ) %>% 
+    ) |> 
     purrr::map(~ {
       tryCatch({
         readxl::read_xls(
@@ -307,8 +373,8 @@ process_gdrive_hospital_files <- function(folder_id) {
         warning("Failed to read file: ", basename(.), " Error: ", e$message)
         return(NULL)
       })
-    }) %>%
-    purrr::compact() %>%  # Remove NULL results
+    }) |>
+    purrr::compact() |>  # Remove NULL results
     purrr::map2(
       .y = basename(list.files(
         path = download_dir,
@@ -316,7 +382,7 @@ process_gdrive_hospital_files <- function(folder_id) {
         full.names = TRUE
       )), 
       ~ dplyr::mutate(.x, DataFrameName = .y)
-    ) %>% 
+    ) |> 
     purrr::list_rbind(names_to = "DataFrameID")
     
     return(result)
@@ -346,19 +412,14 @@ An initial mastersheet was compiled by combining the following inputs;
 
 -   The dataframes were combined into one using *tidyverse* syntax (v`{r} utils::packageVersion("tidyverse")`) [@tidyverse].
 
-```{r}
-#| label: snapshot-folder
-#| echo: false
 
-folderid1 <- "1K6g9OFP44xXWwhA_34xjXY0Lvw6lqYrH"
-
-#setwd("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working\\Registry Custodian\\Data Flow\\Consult Lists\\Retrospective Surgery Lists\\Feb2021 to Feb2023")
-```
 
 ```{r}
 #| label: Master-Data-inputs-1
 
-Hospital1 <- process_gdrive_hospital_files(folderid1)
+
+
+Hospital1 <- process_gdrive_hospital_files(FolderIDs$Folder1)
 
 
 ```
@@ -369,26 +430,26 @@ The combined dataframe was reorganised with columns renamed, additional columns 
 #| label: Master-Data-inputs-2
 # Tidy up combined dataframe
 
-Hospital2 <- Hospital1 %>% 
+Hospital2 <- Hospital1 |> 
   mutate(
     URN = case_when(
       !is.na(`UR NUMBER`) & is.na(`UR #`) ~ `UR NUMBER`,
       is.na(`UR NUMBER`) & !is.na(`UR #`) ~ `UR #`)
-    ) %>% mutate(
+    ) |> mutate(
     Type = case_when(
       !is.na(`Prim/Rev/Bilateral`) & is.na(`PRIM/REV/PART`) & is.na(`PRIM/REV/PARTIAL`) ~ `Prim/Rev/Bilateral`,
         is.na(`Prim/Rev/Bilateral`) & !is.na(`PRIM/REV/PARTIAL`) & is.na(`PRIM/REV/PART`) ~ `PRIM/REV/PARTIAL`,
         is.na(`Prim/Rev/Bilateral`) & is.na(`PRIM/REV/PARTIAL`) & !is.na(`PRIM/REV/PART`) ~ `PRIM/REV/PART`)
-    ) %>% rename(
+    ) |> rename(
       DateSurgery = `OP DATE`
-      ) %>% mutate(
+      ) |> mutate(
   DateSurgery2 = str_replace_all(DateSurgery,"\\.","-")
-  ) %>% mutate(
+  ) |> mutate(
     URN2 = gsub("'","",URN),
     DateSurgery3 = lubridate::dmy(DateSurgery2)
-    ) %>% filter(
+    ) |> filter(
       !is.na(URN2)
-      ) %>% dplyr::select(
+      ) |> dplyr::select(
         -(c(
           `UR NUMBER`,
           `UR #`,
@@ -399,7 +460,7 @@ Hospital2 <- Hospital1 %>%
           DateSurgery,
           DateSurgery2,
           DataFrameName))
-        ) %>% rename(
+        ) |> rename(
           DateSurgery = "DateSurgery3",
           URN = "URN2",
           Joint = "KNEE/HIP",
@@ -418,14 +479,14 @@ The surgeon-consultant identifier was recoded to a re-identifiable format and th
 # Recode Surgeon
 Surgeon <- unique(Hospital2$CONSULTANT)
 
-Hospital3 <- Hospital2 %>% filter(
+Hospital3 <- Hospital2 |> filter(
   Joint == "Knee"
-  ) %>% rename(
+  ) |> rename(
     SurgeryDate = "DateSurgery",
     PatientID = "URN",
     SurgerySide = "Side",
     SurgeryType = "Type"
-    ) %>% dplyr::mutate(
+    ) |> dplyr::mutate(
     SurgerySide = stringr::str_to_title(SurgerySide),
   SerialDate = round(
     as.numeric(difftime(SurgeryDate,as.Date("1899-12-30"),
@@ -433,7 +494,7 @@ Hospital3 <- Hospital2 %>% filter(
     ),
   TempIDFull = paste0(PatientID,SurgerySide,SerialDate,sep = ""),
   TempIDPart = paste0(PatientID,SurgerySide,sep = ""),
-    ) %>% dplyr::select(
+    ) |> dplyr::select(
       -(c(
         Joint
         ))
@@ -445,13 +506,13 @@ Hospital3 <- Hospital2 %>% filter(
 #| label: hospital-recode
 #| echo: false
 
-Hospital3a <- Hospital3 %>% mutate(
+Hospital3a <- Hospital3 |> mutate(
   CONSULTANT2 = case_when(
     CONSULTANT == "Donley" ~ "Doneley",
     CONSULTANT == "Mclean" ~ "McLean",
     CONSULTANT == "Davis" ~ "Davies",
     .default = CONSULTANT)
-  ) %>% mutate(
+  ) |> mutate(
     ConsultantRecode = case_when(
       CONSULTANT2 == "Bell"  ~ "A",
       CONSULTANT2 == "Fitzpatrick"  ~ "B",
@@ -461,7 +522,7 @@ Hospital3a <- Hospital3 %>% mutate(
       CONSULTANT2 == "Balendra"  ~ "F",
       .default = "G"
       )
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
       -(c(
         CONSULTANT,
         CONSULTANT2
@@ -485,7 +546,7 @@ An initial grouping was constructed to organise the mastersheet for manual verif
 #| echo: true
 
 
-Hospital4 <- Hospital3a %>% mutate(
+Hospital4 <- Hospital3a |> mutate(
   Group = case_when(
   (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device == "Persona"  ~ "RAS",
     (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device != "Persona"  ~ "Pre-RAS",
@@ -502,71 +563,56 @@ A registry snapshot from SHARKS was retrieved (date 16-Nov-2023) and imported as
 
 A function was generated to retrieve files using the *googledrive* package, to call on later in the analysis for processing data imports.
 
-```{r}
-#| label: folder
-#| echo: false
 
-base_folder_id1 <- "10PC4-TOygmM55QyC3GDjZ3EiYtO1akFw"
+
+
+
+```{epoxy}
+
+
+The snapshot for the SHARKS registry was retrieved from {format(lubridate::ymd(CurrentDate), '%d %B %Y')}.
+
 
 
 ```
-
 ```{r}
-get_specific_snapshot <- function(folder_name, base_folder_id = base_folder_id1) {
-  tryCatch({
-    # Check if the folder exists in the base directory
-    folder <- googledrive::drive_ls(as_id(base_folder_id), pattern = paste0("^", folder_name, "$"))
-    
-    if(nrow(folder) == 0) {
-      stop(paste("Folder", folder_name, "not found"))
-    }
-    
-    # Find the snapshot file in the specified folder
-    snapshot_file <- googledrive::drive_ls(
-      folder$id, 
-      pattern = "Registry data snapshot\\.xlsx$"
-    )
-    
-    if(nrow(snapshot_file) == 0) {
-      stop("No snapshot file found in specified folder")
-    }
-    
-    # Return both pieces of information as a list
-    return(list(
-      snapshot = snapshot_file,
-      folder_name = folder$name
-    ))
-    
-  }, error = function(e) {
-    stop(paste("Error finding specified snapshot:", e$message))
-  })
-}
+#| label: import-snapshot
+
+
+
+
+registry_data <- get_file_from_folder(
+  folder_name = CurrentDate,
+  file_pattern = "Registry data snapshot\\.xlsx$",
+  base_folder_id = FolderIDs$Folder2
+)
+
+temp_file1 <- tempfile(fileext = ".xlsx")
+googledrive::drive_download(
+  file = registry_data$file$id,
+  path = temp_file1,
+  overwrite = TRUE
+)
+
 ```
 
-```{r}
-#| lable: snapshot-setup
-#| echo: false
 
-
-CurrentDate <- as.character("20231116")
-
-FileLoc1 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\QEII Shared Folder\\Registry Snapshots\\",CurrentDate,"\\KneeArthritis data snapshot.xlsx")
-```
 
 ```{r}
 
 
-SHARKSSnapshot1 <- readxl::read_xlsx(
-  path = FileLoc1,
-  sheet = "AllTimePoints",
-  col_names = TRUE
-  ) %>% mutate(
+SHARKSSnapshot1 <- openxlsx2::wb_to_df(
+  temp_file1,
+  sheet = "KneeArthritis",
+  colNames = TRUE,
+  detectDates = TRUE
+  )  |> mutate(
     SurgerySide = stringr::str_to_title(SurgerySide),
   SerialDate = round(
     as.numeric(difftime(SurgeryDate,as.Date("1899-12-30"),
                         units = "days"))
     )
-) %>% dplyr::select(
+) |> dplyr::select(
       !(
         c(
         Lastname,
@@ -574,7 +620,7 @@ SHARKSSnapshot1 <- readxl::read_xlsx(
         Email
         )
         ) 
-      ) %>% unite(
+      ) |> unite(
     "TempIDPart",
     c(
     "PatientID",
@@ -583,7 +629,7 @@ SHARKSSnapshot1 <- readxl::read_xlsx(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-) %>% unite(
+) |> unite(
     "TempIDFull",
     c(
     "PatientID",
@@ -593,7 +639,7 @@ SHARKSSnapshot1 <- readxl::read_xlsx(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-) %>% relocate(
+) |> relocate(
   c(TempIDFull,TempIDPart),
   .before = PatientID
 )
@@ -619,9 +665,22 @@ ConsultantRecode = case_when(
 
 ```{r}
 #| echo: false
-CurrentDate2 <- as.character("2024-06-11")
 
-FileLoc2 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working\\Registry Custodian\\Data Quality auditing and reporting\\Auditing\\DataSource\\Socrates\\",CurrentDate2,"\\KneeArth1.txt")
+# FileLoc2 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working\\Registry Custodian\\Data Quality auditing and reporting\\Auditing\\DataSource\\Socrates\\",CurrentDate2,"\\KneeArth1.txt")    
+
+registry_data2 <- get_file_from_folder(
+  folder_name = CurrentDate2,
+  file_pattern = "KneeArth1\\.txt$",
+  base_folder_id = FolderIDs$Folder3
+)
+
+temp_file2 <- tempfile(fileext = ".txt")
+googledrive::drive_download(
+  file = registry_data2$file$id,
+  path = temp_file2,
+  overwrite = TRUE
+)
+
 ```
 
 ```{r}
@@ -629,12 +688,12 @@ FileLoc2 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working
 
 
 SHARKSSoc2 <- readr::read_delim(
-  file = FileLoc2,
+  file = temp_file2,
   col_names = TRUE,
-   guess_max = 25,
- col_select = (-c(11,23)
-                ),
-  name_repair = ~stringr::str_replace_all(str_to_title(.)," |\\\\","")
+  guess_max = 25,
+  col_select = (-c(11,23)),
+  name_repair = ~stringr::str_replace_all(str_to_title(.)," |\\\\",""),
+  show_col_types = FALSE
   )
 
 
@@ -647,24 +706,39 @@ A report from the RAS vendor was extracted and stored in an xlsx file and import
 ```{r}
 #| echo: false
 
-FileLoc3 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working\\Publications\\Early Outcomes of Robotic Arthroplasty\\Client Material\\QEII TKR ROSA Reports.xlsx")
+    # FileLoc3 <- paste0("G:\\My Drive\\EBMA\\Client Drive\\QEII Jubilee\\EBMA Working\\Publications\\Early Outcomes of Robotic Arthroplasty\\Client Material\\QEII TKR ROSA Reports.xlsx")
+    
+    
+  vendorreport <- get_file_from_folder(
+  folder_name = "Client Material",
+  file_pattern = "(?i)QEII TKR ROSA Reports\\.xlsx$",
+  base_folder_id = FolderIDs$Folder4
+)
+
+temp_file4 <- tempfile(fileext = ".XLSX")
+googledrive::drive_download(
+  file = vendorreport$file$id,
+  path = temp_file4,
+  overwrite = TRUE
+)
 
 ```
 
 ```{r}
 #| label: vendor-report
 
-VendorReport <- readxl::read_xlsx(
-  path = FileLoc3,
+VendorReport <- openxlsx2::wb_to_df(
+  temp_file4,
   sheet = "Sheet1",
-  col_names = TRUE
-  ) %>% rename(
+  colNames = TRUE,
+  detectDates = TRUE
+  ) |> rename(
     SurgeryDate = "Surgery Date",
     CONSULTANT = "Surgeon name",
     Description = "Surgery Description",
     PatientID = "Patient",
     SurgerySide = "Left/Right desc."
-    ) %>% mutate(
+    ) |> mutate(
   SerialDate = round(
     as.numeric(difftime(SurgeryDate,as.Date("1899-12-30"),
                         units = "days"))
@@ -675,13 +749,13 @@ VendorReport <- readxl::read_xlsx(
   ),
   URN = purrr::map_chr(stringr::str_extract_all(PatientID, "\\d+"),~ str_c(.x[1])),
   SurgerySide = stringr::str_to_title(SurgerySide)
-) %>% mutate(
+) |> mutate(
   URN2 = case_when(
   str_count(str_extract(URN,"\\d+")) == 5 ~ paste0("0",URN),
     str_count(str_extract(URN,"\\d+")) == 4 ~ paste0("00",URN),
   .default = URN
   )
-) %>% unite(
+) |> unite(
     "TempIDPart1",
     c(
       "SurgerySide",
@@ -690,7 +764,7 @@ VendorReport <- readxl::read_xlsx(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-) %>% unite(
+) |> unite(
     "TempIDPart",
     c(
     "URN2",
@@ -699,7 +773,7 @@ VendorReport <- readxl::read_xlsx(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-) %>% unite(
+) |> unite(
     "TempIDFull",
     c(
     "URN2",
@@ -717,7 +791,7 @@ Surgeon names were recoded
 
 ```{r}
 #| echo: false
-VendorReport1 <- VendorReport %>% dplyr::mutate(
+VendorReport1 <- VendorReport |> dplyr::mutate(
   ConsultantRecode = case_when(
   grepl("Bell",CONSULTANT)  ~ "A",
   grepl("FitzPatrick",CONSULTANT)  ~ "B",
@@ -731,9 +805,9 @@ VendorReport1 <- VendorReport %>% dplyr::mutate(
 ```
 
 ```{r}
-VendorExclusions <- VendorReport1 %>% filter(
+VendorExclusions <- VendorReport1 |> filter(
   is.na(URN)
-) %>% mutate(
+) |> mutate(
   Exclusion = case_when(
     str_detect(str_to_lower(Description),"canc*|revis*|demo|washout") ~ "Possible",
     str_detect(PatientID,"TBC") ~ "Possible",
@@ -746,7 +820,7 @@ Data sources were crossmatched using one of the temporary identifier columns wit
 
 ```{r}
 
-Snapshot1 <- SHARKSSnapshot %>% dplyr::select(
+Snapshot1 <- SHARKSSnapshot |> dplyr::select(
   TempIDFull,
   TempIDPart,
   SerialDate,
@@ -761,14 +835,14 @@ Snapshot1 <- SHARKSSnapshot %>% dplyr::select(
 CombinedInputs = bind_rows(
   list(Hospital = Hospital3a,
        SHARKS = Snapshot1,
-       Vendor = VendorReport1 %>% anti_join(.,
-                                           VendorExclusions,
-                                           by = "TempIDPart")
+       Vendor = VendorReport1 |> anti_join(
+         VendorExclusions,
+         by = "TempIDPart")
        ), 
   .id = "Source"
   )
 
-MasterList <- CombinedInputs %>% dplyr::select(
+MasterList <- CombinedInputs |> dplyr::select(
   PatientID,
   URN,
   TempIDFull,
@@ -779,13 +853,13 @@ MasterList <- CombinedInputs %>% dplyr::select(
   SerialDate,
   SurgerySide,
   SurgeryType
-  ) %>% mutate(
+  ) |> mutate(
     PatientID2 = ifelse(is.na(URN),PatientID,URN)
-  ) %>% group_by(
+  ) |> group_by(
     TempIDFull
-  ) %>% mutate(
+  ) |> mutate(
     Entry = row_number()
-  ) %>% arrange(
+  ) |> arrange(
     Source,
     .by_group = TRUE
   ) 
@@ -794,7 +868,7 @@ MasterList2 <- slice_min(
   MasterList,
   Entry,
   n = 1
-  ) %>% filter(
+  ) |> filter(
     !is.na(PatientID2)
   )
 
@@ -934,7 +1008,7 @@ The dataset was prepared for further analysis through creating new variables, re
 ```{r}
 #| label: process-table-1A
 
-G1and2_1A <- G1and2 %>% select(!(ComplicationForm)) %>% 
+G1and2_1A <- G1and2 |> select(!(ComplicationForm)) |> 
   mutate(
     GroupUpdated = case_when(
       Group == 1 ~ "RAS",
@@ -969,17 +1043,17 @@ Surgeon names were recoded and duplicate records removed.
 #| label: process-table-1B
 #| echo: false
 
-G1and2_1B <- G1and2_1A %>% dplyr::mutate(
+G1and2_1B <- G1and2_1A |> dplyr::mutate(
   Surgeon2 = case_when(
       grepl("Bell",Surgeon) ~ "A",
       grepl("Meta",Surgeon) ~ "B",
       grepl("Fitzpatrick",Surgeon) ~ "C"
         )
-) %>% dplyr::select(
+) |> dplyr::select(
     !(Surgeon)
-    ) %>% rename(
+    ) |> rename(
       Surgeon = "Surgeon2"
-      ) %>% filter( #See comment in STROBE [13] - duplicate input record
+      ) |> filter( #See comment in STROBE [13] - duplicate input record
         !(MockUpID == "157031Left44551")
       )
 
@@ -989,7 +1063,7 @@ G1and2_1B <- G1and2_1A %>% dplyr::mutate(
 ```{r}
 #| label: process-table-2
 
-G1band3_1 <- G1band3 %>% select(!(ComplicationForm)) %>% mutate(
+G1band3_1 <- G1band3 |> select(!(ComplicationForm)) |> mutate(
   GroupUpdated = case_when(
     Group == "3" ~ "Non-RAS",
     Group == "1b" ~ "Potential-RAS"
@@ -1032,9 +1106,9 @@ Individual input tables were joined into a MasterSheet and additional variables 
 MasterSheet1 <- bind_rows(
   G1band3_1,
   G1and2_1B
-) %>% dplyr::select(
+) |> dplyr::select(
   -Process
-) %>% mutate(
+) |> mutate(
   SerialDate = round(
     as.numeric(difftime(SurgeryDate,as.Date("1899-12-30"),
                         units = "days"))),
@@ -1044,7 +1118,7 @@ MasterSheet1 <- bind_rows(
     str_count(PatientID) == 4 ~ paste0("00",PatientID),
     .default = PatientID
   )
-  ) %>% unite(
+  ) |> unite(
     "TempIDFull",
     c("PatientID2",
       "SurgerySide",
@@ -1053,7 +1127,7 @@ MasterSheet1 <- bind_rows(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-  ) %>% unite(
+  ) |> unite(
     "TempIDPart",
     c("PatientID2",
       "SurgerySide"
@@ -1061,7 +1135,7 @@ MasterSheet1 <- bind_rows(
     remove = FALSE,
     na.rm = TRUE,
     sep = ""
-  ) %>% relocate(
+  ) |> relocate(
     PotentialExclus
   )
 
@@ -1073,11 +1147,11 @@ Identifier columns were reviewed for coherence.
 # Assuming your dataframe is called 'df' and the two identifier columns are 'id1' and 'id2'
 
 # Step 1: Create a new column that flags mismatches
-MasterSheetCheck <- MasterSheet1 %>%
+MasterSheetCheck <- MasterSheet1 |>
   mutate(id_mismatch = MockUpID != TempIDFull)
 
 # Step 2: View all rows with mismatches
-mismatched_rows <- MasterSheetCheck %>%
+mismatched_rows <- MasterSheetCheck |>
   filter(id_mismatch == TRUE)
 
 # Step 3: Print the number of mismatches
@@ -1087,7 +1161,7 @@ print(paste("Number of mismatches:", nrow(mismatched_rows)))
 print(mismatched_rows)
 
 # Optional: If you want to see only the identifier columns and a few others
-mismatched_ids <- mismatched_rows %>%
+mismatched_ids <- mismatched_rows |>
   select(MockUpID, TempIDFull)
 print(mismatched_ids)
 ```
@@ -1097,11 +1171,11 @@ The mastersheet was checked for duplicate records.
 ```{r}
 # Check for duplicates
 
-MasterDuplicates <-MasterSheet1 %>% 
+MasterDuplicates <-MasterSheet1 |> 
     summarise(
     n = n(),
     .by = "TempIDPart"
-  ) %>% filter(
+  ) |> filter(
     n > 1
   )
 
@@ -1114,7 +1188,7 @@ MasterDuplicates <-MasterSheet1 %>%
 #| tbl-cap: "Summary of input variables used to determine group labelling."
 
 Table3 <- tbl_summary(
-  MasterSheet1 %>% dplyr::select(
+  MasterSheet1 |> dplyr::select(
     GroupUpdated,
     Surgeon,
     SurgeryDate,
@@ -1125,10 +1199,9 @@ Table3 <- tbl_summary(
   statistic = list(
     SurgeryDate = "{min} - {max}"
   )
-) %>% add_overall()
+) |> add_overall()
 
-as_flex_table(Table3) %>% flextable::set_table_properties(
-  .,
+as_flex_table(Table3) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -1142,19 +1215,19 @@ as_flex_table(Table3) %>% flextable::set_table_properties(
 
 SerialG1Start <- as.numeric(difftime(as.Date("2021-02-19"),as.Date("1899-12-30")))
 
-VendorExclusions2 <- VendorExclusions %>% filter(
+VendorExclusions2 <- VendorExclusions |> filter(
   Exclusion == "Possible"
 )
 
-MasterSheet2 <- MasterSheet1 %>% filter(
+MasterSheet2 <- MasterSheet1 |> filter(
   PotentialExclus != "Yes"
-  ) %>% mutate(# fix a couple of uncertain groupings
+  ) |> mutate(# fix a couple of uncertain groupings
     AlignmentReferencing = case_when(
       MockUpID == "2045744Left44895" ~ "Robotic",
       MockUpID == "267722left44743" ~ "Robotic",
       .default = AlignmentReferencing
     ) 
-  ) %>% mutate(
+  ) |> mutate(
     GroupCorrected = case_when(
   (AlignmentReferencing == "Robotic") | (is.na(AlignmentReferencing) & (TempIDPart %in% VendorReport$TempIDPart)) ~ "RAS",
 GroupUpdated == "Pre-RAS" | (GroupUpdated == "RAS" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Pre-RAS",
@@ -1162,9 +1235,9 @@ GroupUpdated == "RAS" & is.na(AlignmentReferencing) & !(TempIDPart %in% VendorRe
 GroupUpdated == "Non-RAS" | (GroupUpdated == "Potential-RAS" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Non-RAS",
   .default = "Non-RAS"
     )
-) %>% arrange(
+) |> arrange(
   SurgeryDate
-  ) %>% relocate(
+  ) |> relocate(
     GroupCorrected,
     .after = Group
   )
@@ -1173,11 +1246,11 @@ GroupUpdated == "Non-RAS" | (GroupUpdated == "Potential-RAS" & !is.na(AlignmentR
 ```{r}
 #| label: Exclusions
 
-MasterSheetExclusions <- MasterSheet1 %>% filter(
+MasterSheetExclusions <- MasterSheet1 |> filter(
   PotentialExclus == "Yes"
 )
 
-Unsure <- MasterSheet2 %>% filter(
+Unsure <- MasterSheet2 |> filter(
   is.na(AlignmentReferencing)
 )
 
@@ -1188,7 +1261,7 @@ The complication response table was filtered for entries missing a patient recor
 ```{r}
 
 #Had to add a filter on missing PatientIDs (URNs) in the ComplicResponse table as the mutate function str_count would not work with NAs passed as input. 
-ComplicResponse2 <- ComplicResponse %>% filter(
+ComplicResponse2 <- ComplicResponse |> filter(
     !is.na(URN)
     )
 
@@ -1198,7 +1271,7 @@ A list of records in the MasterSheet missing at least one complication form entr
 
 ```{r}
 
-MissingComplic <- MasterSheet2 %>% filter(
+MissingComplic <- MasterSheet2 |> filter(
   !(PatientID %in% ComplicResponse2$URN)
 )
 
@@ -1224,15 +1297,15 @@ The SHARKS snapshot was used to update demographic data (age, sex, body mass ind
 ```{r}
 # Create MockUpID; concatenate PatientID, Side and SurgeryDate
 
-SHARKSSnapshot1 <- SHARKSSnapshot %>% mutate(
+SHARKSSnapshot1 <- SHARKSSnapshot |> mutate(
   SurgerySide = stringr::str_to_title(SurgerySide)
-) %>% unite(
+) |> unite(
   "TempIDFull",
   c(PatientID,SurgerySide,SerialDate),
   remove = FALSE,
   na.rm = FALSE,
   sep = ""
-  ) %>% unite(
+  ) |> unite(
     "TempIDPart",
     c(PatientID,SurgerySide),
     remove = FALSE,
@@ -1240,20 +1313,19 @@ SHARKSSnapshot1 <- SHARKSSnapshot %>% mutate(
     sep = ""
     )
 
-MasterSheet3 <- MasterSheet2 %>% left_join(
-    .,
-    SHARKSSnapshot1 %>% filter(
+MasterSheet3 <- MasterSheet2 |> left_join(
+    SHARKSSnapshot1 |> filter(
       SurgeryType == "Primary"
-      ) %>% dplyr::select(
+      ) |> dplyr::select(
         TempIDPart,
         AgeAtSurgery,
         Gender,
         BMI
-        ) %>% rename(
+        ) |> rename(
           Sex = "Gender"
           ),
     join_by("TempIDPart" == "TempIDPart")
-    ) %>% mutate(
+    ) |> mutate(
       Sex = ifelse(
         is.na(Sex.x),Sex.y,Sex.x
         ),
@@ -1265,10 +1337,10 @@ MasterSheet3 <- MasterSheet2 %>% left_join(
       BMI = ifelse(
         is.na(BMI.x),BMI.y,BMI.x
         )
-      ) %>% dplyr::select(
+      ) |> dplyr::select(
         -(ends_with(".x")
           )
-        ) %>% dplyr::select(
+        ) |> dplyr::select(
           -(ends_with(".y")
             )
           )
@@ -1284,14 +1356,14 @@ The reduction in missing data was confirmed before and after the table merge to 
 
 
 
-FigureMiss1 <- gg_miss_var(MasterSheet2 %>% dplyr::select(
+FigureMiss1 <- gg_miss_var(MasterSheet2 |> dplyr::select(
   AgeAtSurgery,
   Sex
 ),
 show_pct = TRUE
 ) + theme_bw() 
 
-FigureMiss2 <- gg_miss_var(MasterSheet3 %>% dplyr::select(
+FigureMiss2 <- gg_miss_var(MasterSheet3 |> dplyr::select(
   AgeAtSurgery,
   Sex
 ),
@@ -1352,7 +1424,7 @@ The initial state of the grouping variables was tabled using *gtsummary* (v`{r} 
 #| tbl-cap: "Summary of grouping inputs separated by estimated grouping."
 
 Table4 <- tbl_summary(
-  MasterSheet3 %>% dplyr::select(
+  MasterSheet3 |> dplyr::select(
     GroupCorrected,
     Surgeon,
     SurgeryDate,
@@ -1364,7 +1436,7 @@ Table4 <- tbl_summary(
   ),
   by = GroupCorrected,
   statistic = list(SurgeryDate ~ "{min} - {max}")
-) %>% add_overall()
+) |> add_overall()
 
 knitr::knit_print(Table4)
 
@@ -1377,7 +1449,7 @@ The surgical fields were adjusted one at a time using a combination of *tidyvers
 #| tbl-cap: "Summary of unadjusted surgical fields separated by estimated grouping."
 
 Table5 <- tbl_summary(
-  MasterSheet3 %>% dplyr::select(
+  MasterSheet3 |> dplyr::select(
     GroupCorrected,
     BilateralStatus2,
     Surgery_ProcedureName:FemurFixation,
@@ -1386,10 +1458,9 @@ Table5 <- tbl_summary(
     Constraint
   ),
   by = GroupCorrected
-) %>% add_overall()
+) |> add_overall()
 
-as_flex_table(Table5) %>% flextable::set_table_properties(
-  .,
+as_flex_table(Table5) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -1402,7 +1473,7 @@ as_flex_table(Table5) %>% flextable::set_table_properties(
 
 ```{r}
 
-MasterSheet4 <- MasterSheet3 %>% mutate(
+MasterSheet4 <- MasterSheet3 |> mutate(
   Approach2 = case_when(
     str_detect(Approach,"Lat") ~ str_replace(Approach,"\\bLat\\b","Lateral"),
     str_detect(Approach,"Med") ~ str_replace(Approach,"\\bMed\\b","Medial"),
@@ -1501,11 +1572,11 @@ ComorbidDiabetes = case_when(
    .default = "No"
   ),
   OpDelay = as.numeric(difftime(SurgeryDate,DateOfInitialExam,units = "weeks")) 
-  ) %>%
+  ) |>
   dplyr::select(!(c("Height","Weight","Comorbidities"))
-) %>% dplyr::select(
+) |> dplyr::select(
   -Approach
-) %>% relocate(
+) |> relocate(
   Approach2,
   .after = Operator
 )
@@ -1518,7 +1589,7 @@ ComorbidDiabetes = case_when(
 #| tbl-cap: "Summary of surgical fields by group after initial adjustment."
 
 Table6 <- tbl_summary(
-  MasterSheet4 %>% dplyr::select(
+  MasterSheet4 |> dplyr::select(
     SurgerySide,
     GroupCorrected,
     BilateralStatus2,
@@ -1548,10 +1619,9 @@ Table6 <- tbl_summary(
     Constraint2 ~ "Prosthesis Constraint"
   ),
   by = GroupCorrected
-) %>% add_overall()
+) |> add_overall()
 
-as_flex_table(Table6) %>% flextable::set_table_properties(
-  .,
+as_flex_table(Table6) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -1571,12 +1641,12 @@ Procedure start and end times were captured during Chart Review (2). Durations w
 
 ```{r}
 
-MasterSheet5 <- MasterSheet4 %>% rename(
+MasterSheet5 <- MasterSheet4 |> rename(
   OperationStart = `Operation Start Time`,
   OperationFinish = `Operation Finish Time`
-  ) %>% mutate(
+  ) |> mutate(
   OperationStart = as.POSIXct(OperationStart, tz = "", format = "%Y-%m-%d %H:%M:%OS"),
-  OperationFinish = as.POSIXct(OperationFinish, tz = "", format = "%Y-%m-%d %H:%M:%OS")) %>%
+  OperationFinish = as.POSIXct(OperationFinish, tz = "", format = "%Y-%m-%d %H:%M:%OS")) |>
   mutate(ProcedureDuration = as.numeric(difftime(OperationFinish,OperationStart, units = "mins"))) 
 
 ```
@@ -1587,8 +1657,8 @@ Cases over 4 hours were retrieved for manual review.
 #| label: tbl-longduration
 #| tbl-cap: "Individual case data for instances of procedure duration over 4 hours."
 
-knitr::kable(MasterSheet5 %>%
-                filter(ProcedureDuration >239) %>%
+knitr::kable(MasterSheet5 |>
+                filter(ProcedureDuration >239) |>
                 dplyr::select(ProgressIndicator,
                               ProgressComment,
                               BilateralStatus,
@@ -1598,7 +1668,7 @@ knitr::kable(MasterSheet5 %>%
                               SurgerySide,
                               Surgeon,
                               Operator,
-                              GroupCorrected) %>%
+                              GroupCorrected) |>
                 arrange(GroupCorrected,Surgeon),
               format = "html")
 ```
@@ -1609,11 +1679,11 @@ After manual review, it was concluded that Increased operative time reflected bi
 
 ```{r}
 
-ComplicResponse2a <- ComplicResponse2 %>% rename(
+ComplicResponse2a <- ComplicResponse2 |> rename(
   PatientID = "URN"
 )
 
-MasterSheet5a <- MasterSheet5 %>%
+MasterSheet5a <- MasterSheet5 |>
   mutate(ComplicCount = sapply(seq_along(unlist(PatientID)), function(i) {
     sum(str_count(unlist(ComplicResponse2a$PatientID), unlist(PatientID)[i]))
   }))
@@ -1626,15 +1696,15 @@ Manually adjust data entry errors (dates). Calculate occurrence delay (DateSurge
 ```{r}
 
 
-ComplicResponse3 <- ComplicResponse2a %>% rename_with(
+ComplicResponse3 <- ComplicResponse2a |> rename_with(
   ~ str_replace_all(., " ", "")
-) %>% filter(
+) |> filter(
   !(ComplicationOccurrence == "No")
-) %>% mutate(
+) |> mutate(
     ComplicationNature = str_replace(ComplicationNature,"#","fracture"),
     extracted_date = str_extract(ComplicationNature, "\\d{2}-(?:[A-Za-z]{3}|\\d{2})-\\d{4}"),
     parsed_date = parse_date_time(extracted_date, "d-b-Y")
-) %>% mutate( #fix a couple of individual responses
+) |> mutate( #fix a couple of individual responses
     parsed_date = case_when(
       ResponseID == "5258200" ~ ymd("2019-09-27"),
       ResponseID == "5333794" ~ NA_POSIXct_,
@@ -1663,10 +1733,10 @@ ComplicResponse4 <- tidytext::unnest_tokens(
   format = "text",
   to_lower = TRUE,
   drop = FALSE
-) %>% anti_join(
+) |> anti_join(
   Stop,
   by = c("Term" = "word")
-) %>% mutate(
+) |> mutate(
   TermLength = stringr::str_length(Term)
 )
 
@@ -1677,17 +1747,17 @@ Terms with less than four characters were extracted and reproduced in an externa
 ```{r}
 # Retrieve terms less than 4 characters that likely need to be recast into full words
 
-TargetTerms <- ComplicResponse4 %>% dplyr::select(
+TargetTerms <- ComplicResponse4 |> dplyr::select(
   ResponseID,
   Term
-  ) %>% distinct(
+  ) |> distinct(
   Term,
   .keep_all = TRUE
-  ) %>% mutate(
+  ) |> mutate(
     TermLength = stringr::str_length(Term)
-    ) %>% filter(
+    ) |> filter(
      TermLength < 5 & stringr::str_detect(Term,"\\d",negate = TRUE)
-  ) %>% arrange(
+  ) |> arrange(
     Term
   )
 
@@ -1699,7 +1769,7 @@ TargetTerms <- ComplicResponse4 %>% dplyr::select(
 # Commented out after first use
 googlesheets4::range_write(
 ss= "https://docs.google.com/spreadsheets/d/1Nk4i8g65C-i7-24KJdBoMn7QwGrkoYA88l5V45b47Wk/edit",
-data = TargetTerms %>% dplyr::select(
+data = TargetTerms |> dplyr::select(
   ResponseID,
   Term
 ),
@@ -1721,7 +1791,7 @@ TargetTerms2 <- googlesheets4::range_read(
   range = "A1:C",
   col_names = TRUE,
   trim_ws = TRUE
-) %>% mutate(
+) |> mutate(
   TargetTerm = paste0("\\b",Term,"\\b")
 )
 ```
@@ -1751,12 +1821,12 @@ ReplaceTermFun <- function(String) {
 
 ```{r}
 
-ComplicResponse5 <- ComplicResponse4 %>% mutate(
+ComplicResponse5 <- ComplicResponse4 |> mutate(
     Term1 = case_when(
       TermLength < 5 & str_detect(Term,"\\d", negate = TRUE) ~ str_replace_all(Term, TargetTermsList, ReplaceTermFun),
       .default = Term
       )
-  ) %>% filter(
+  ) |> filter(
     str_detect(Term1,"\\d", negate = TRUE)
   )
   
@@ -1769,10 +1839,10 @@ A figure displaying term frequency was generated using *ggplot2* and formatted f
 #| label: fig-complicfreq
 #| fig-cap: "Complication terms by frequency."
 
-Figure3 <- ComplicResponse5 %>% filter(!Term1 == "treatment") %>%
-  count(Term1, sort = TRUE) %>%
-  filter(n > 3) %>%
-  mutate(Term1 = reorder(Term1, n)) %>%
+Figure3 <- ComplicResponse5 |> filter(!Term1 == "treatment") |>
+  count(Term1, sort = TRUE) |>
+  filter(n > 3) |>
+  mutate(Term1 = reorder(Term1, n)) |>
   ggplot(aes(n, Term1)) +
   geom_col() +
   labs(y = NULL)
@@ -1788,8 +1858,8 @@ A wordcloud was generated using *wordcloud* (`{r} utils::packageVersion(pkg = "w
 #| fig-cap: "Word cloud of terms appearing in the adverse event descriptions."
 
 
-Figure4 <- ComplicResponse5 %>% filter(!Term1 == "treatment") %>%
-  count(Term1) %>%
+Figure4 <- ComplicResponse5 |> filter(!Term1 == "treatment") |>
+  count(Term1) |>
   with(wordcloud::wordcloud(Term1, n, max.words = 50))
 
 knitr::knit_print(Figure4)
@@ -1833,33 +1903,32 @@ knitr::knit_print(Figure4)
 
 ComplicResponse6 <- left_join(
   ComplicResponse3,
-  ComplicResponse5 %>%
+  ComplicResponse5 |>
   group_by(
     ResponseID
-    ) %>%
+    ) |>
   summarize(
     Term2 = str_c(Term1, collapse = " ")
-  ) %>% ungroup(),
+  ) |> ungroup(),
   by = "ResponseID"
-) %>% dplyr::select(
+) |> dplyr::select(
   -DateofOccurrence
-) %>% rename(
+) |> rename(
   DateofOccurrence = "DateofOccurrence2"
-) %>% arrange(
+) |> arrange(
   PatientID,
   DateofOccurrence
-) %>% mutate(
+) |> mutate(
   TempIDPart = paste0(PatientID,Side)
-) %>% left_join(
-  .,
-  MasterSheet5a %>% dplyr::select(
+) |> left_join(
+  MasterSheet5a |> dplyr::select(
     TempIDPart,
     SurgeryDate,
     GroupCorrected
   ),
   by = "TempIDPart",
   relationship = "many-to-many"
-) %>% mutate(
+) |> mutate(
     OccurDelay = as.numeric(as.duration(interval(ymd(SurgeryDate), ymd(DateofOccurrence))),"days")
   )
 
@@ -1868,7 +1937,7 @@ ComplicResponse6 <- left_join(
 Retrieve problem entries
 
 ```{r}
-ComplicProblem <- ComplicResponse6 %>% filter(
+ComplicProblem <- ComplicResponse6 |> filter(
   !(between(OccurDelay,0,365))
 )
 ```
@@ -1876,7 +1945,7 @@ ComplicProblem <- ComplicResponse6 %>% filter(
 Data entry errors were corrected manually by shifting date of occurrence entries forward or backwards by years to align with the surgery date appropriately. Regular expressions were used to match terms to consensus adverse event definitions for total knee arthroplasty [@healy2013].
 
 ```{r}
-ComplicResponse6a <- ComplicResponse6 %>% 
+ComplicResponse6a <- ComplicResponse6 |> 
   mutate(
     DateofOccurrence = case_when(
       ResponseID == "5258079" ~ DateofOccurrence + years(1),
@@ -1888,9 +1957,9 @@ ComplicResponse6a <- ComplicResponse6 %>%
       ResponseID == "5627467" ~ DateofOccurrence + years(1),
       .default = ReoperationDate
   )
-  ) %>% mutate(
+  ) |> mutate(
     OccurDelay = as.numeric(interval(ymd(SurgeryDate), ymd(DateofOccurrence)), "days")
-  ) %>% mutate(
+  ) |> mutate(
     Bleed = if_else(str_detect(Term2,"bleed*|haemarth*|transfusion") & ComplicationType == "Post-Op","Bleed","No"),
     Wound = if_else(str_detect(Term2,"\\b(delay\\w*|heal\\w*|breakdown|necrosis)\\b") & ComplicationType == "Post-Op","Wound","No"),
     Thromboembolism = if_else(str_detect(Term2,"thromb*|embol*|occul*"),"Thromboembolism","No"),
@@ -1913,12 +1982,12 @@ ComplicResponse6a <- ComplicResponse6 %>%
     Reoperation = if_else(!is.na(ReoperationDate) & Revision == "No","Reoperation","No"),
     Readmission = if_else((Revision == "Revision"|Reoperation == "Reoperation")|str_detect(Term2,"readmi*|admit*|admiss*|hospital") & ComplicationType != "In-theatre","Readmission","No")
     #Mortality - no occurrences
-  ) %>% rowwise() %>% mutate(
+  ) |> rowwise() |> mutate(
     Other = case_when(
     if_all(Bleed:Delivery, ~ str_detect(., "No")) ~ "Other",
     .default = "No"
     )
-  ) %>% relocate(
+  ) |> relocate(
     Other,
     .before = Revision
   )
@@ -1926,8 +1995,7 @@ ComplicResponse6a <- ComplicResponse6 %>%
 ```
 
 ```{r}
-ComplicResponse7 <- ComplicResponse6a %>% pivot_longer(
-  .,
+ComplicResponse7 <- ComplicResponse6a |> pivot_longer(
   cols = c(
     "Bleed",
     "Wound",
@@ -1953,45 +2021,43 @@ ComplicResponse7 <- ComplicResponse6a %>% pivot_longer(
   names_to = "Category_Name",
   values_to = "Category_Value",
   values_drop_na = FALSE
-)  %>% filter(
+)  |> filter(
   !(Category_Value == "No"),
   OccurDelay <= 90
-) %>% group_by(
+) |> group_by(
   TempIDPart
-) %>% arrange(
+) |> arrange(
   desc(DateofOccurrence),
   .by_group = TRUE
-) %>% distinct( #duplicate entries for the same patient(Treatment)
-  .,
+) |> distinct( #duplicate entries for the same patient(Treatment)
   pick(TempIDPart,
   DateofOccurrence,
   Category_Value
   ),
   .keep_all = TRUE
-) %>% ungroup()
+) |> ungroup()
 ```
 
 ```{r}
 
 CutOffDate <- as.character("20230630")
 
-MasterCensor <- MasterSheet5a %>% filter(
+MasterCensor <- MasterSheet5a |> filter(
    !(TempIDPart %in% ComplicResponse7$TempIDPart)
-) %>% dplyr::select(
+) |> dplyr::select(
   TempIDPart,
   SurgeryDate,
   GroupCorrected
-) %>% bind_rows(
-  .,
-  ComplicResponse7 %>% dplyr::select(
+) |> bind_rows(
+  ComplicResponse7 |> dplyr::select(
     TempIDPart,
     SurgeryDate,
     GroupCorrected
   ) 
-  ) %>% distinct(
+  ) |> distinct(
     TempIDPart,
     .keep_all = TRUE
-  ) %>% mutate(
+  ) |> mutate(
   ComplicationOccurrence = "No",
   DateofOccurrence = ymd(CutOffDate),
   Category_Value = "Censored"
@@ -2003,7 +2069,7 @@ MasterCensor <- MasterSheet5a %>% filter(
 ```{r}
 
 MasterPROMs <- left_join(
-  MasterSheet5a %>% dplyr::select(
+  MasterSheet5a |> dplyr::select(
     TempIDFull,
     AgeAtSurgery,
     Sex,
@@ -2030,7 +2096,7 @@ MasterPROMs <- left_join(
                 VASPainScore_3months,
 ),
 by = "TempIDFull"
-) %>% mutate(
+) |> mutate(
     Group1 = forcats::fct_recode(
       GroupCorrected,
       "RAS" = "1",
@@ -2045,24 +2111,23 @@ by = "TempIDFull"
 
 levels <- c("Preoperative" = "Preop",
             "3months" = "3months")
-MasterPROMs1 <- MasterPROMs %>% rename_with(
-  .,
+MasterPROMs1 <- MasterPROMs |> rename_with(
   ~ stringr::str_replace(.,"_",""),
   starts_with("Oxford")
-) %>% dplyr::select(
+) |> dplyr::select(
   Group1,
   TempIDFull,
   starts_with("Oxford"),
   starts_with("VR12")
-) %>% pivot_longer(
+) |> pivot_longer(
   cols = !c(Group1,TempIDFull),
   names_to = c(".value","TimePoint"),
   names_sep = "_",
   values_drop_na = TRUE
-) %>% mutate(
+) |> mutate(
   TimePoint2 = forcats::fct_recode(
       TimePoint,!!!levels
-  ) %>% fct_relevel(.,"Preoperative","3months")
+  ) |> fct_relevel("Preoperative","3months")
 ) 
 ```
 
@@ -2072,7 +2137,7 @@ MasterPROMs1 <- MasterPROMs %>% rename_with(
 
 
 TablePROMs <- tbl_summary(
-  MasterPROMs1 %>% dplyr::select(
+  MasterPROMs1 |> dplyr::select(
    Group1,
   TimePoint2,
   starts_with("Oxford"),
@@ -2083,8 +2148,7 @@ TablePROMs <- tbl_summary(
   label = "Group1" ~ "Group"
 )
 
-as_flex_table(TablePROMs) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TablePROMs) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -2127,26 +2191,26 @@ Missingness was assessed to be low enough to be ignored from the analysis.
 
 ```{r}
 
-MasterSheetMiss <- MasterSheet5a %>% filter(
+MasterSheetMiss <- MasterSheet5a |> filter(
   if_any(c(AgeAtSurgery,Sex,ComorbidDiabetes,BMI,Surgery_ProcedureName:OperationFinish), ~is.na(.))
 )
 
 
-SHARKSSoc2a <- SHARKSSoc2 %>% rename(
+SHARKSSoc2a <- SHARKSSoc2 |> rename(
   PatientID = "PatientId"
-  ) %>% mutate(
+  ) |> mutate(
   TempIDPart = paste0(PatientID,SurgerySide1)
-) %>% relocate(
+) |> relocate(
   TempIDPart
 )
 
-SHARKSBackfill <- SHARKSSoc2a %>% filter(
+SHARKSBackfill <- SHARKSSoc2a |> filter(
   TempIDPart %in% MasterSheetMiss$TempIDPart
 )
 
-MasterSheet5b <- MasterSheet5a %>% filter(
+MasterSheet5b <- MasterSheet5a |> filter(
   TempIDPart %in% SHARKSBackfill$TempIDPart
-) %>% filter(
+) |> filter(
   !(TempIDFull == "412600Right44896")
 )
 
@@ -2156,18 +2220,18 @@ MismatchSHARK <- anti_join(
   by = "TempIDPart"
 )
 
-MissingMaster <- naniar::as_shadow(MasterSheet5b)  %>% mutate(Sheet = "StudyMaster")
+MissingMaster <- naniar::as_shadow(MasterSheet5b)  |> mutate(Sheet = "StudyMaster")
 
 MissingSHARKS <- naniar::as_shadow(
   SHARKSBackfill
-  ) %>% mutate(
+  ) |> mutate(
     Sheet = "RegistrySnapshot"
     )
 
 MissingComp <-bind_rows(
   MissingMaster,
   MissingSHARKS
-) %>% relocate(
+) |> relocate(
   Sheet,
   .before = ProgressIndicator_NA
 )
@@ -2181,7 +2245,7 @@ MissingComp <-bind_rows(
 #| tbl-cap: "Summary of missing values within surgical fields of analysis dataset."
 
 TableMiss1 <- tbl_summary(
-  MissingComp %>% dplyr::select(
+  MissingComp |> dplyr::select(
     Sheet,
     Surgery_ProcedureName_NA:OperationFinish_NA
     ),
@@ -2190,8 +2254,7 @@ type = all_categorical() ~ "dichotomous",
 value = everything() ~ "NA"
 )
 
-as_flex_table(TableMiss1) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableMiss1) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -2208,7 +2271,7 @@ as_flex_table(TableMiss1) %>% flextable::set_table_properties(
 MissingMaster2 <- naniar::as_shadow(MasterSheet5a) 
 
 TableMiss2 <- tbl_summary(
-  MissingMaster2 %>% dplyr::select(
+  MissingMaster2 |> dplyr::select(
     AgeAtSurgery_NA,
     Sex_NA,
     BMI_NA,
@@ -2218,8 +2281,7 @@ type = all_categorical() ~ "dichotomous",
 value = everything() ~ "NA"
 )
 
-as_flex_table(TableMiss2) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableMiss2) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -2234,7 +2296,7 @@ as_flex_table(TableMiss2) %>% flextable::set_table_properties(
 #| label: fig-keyvar-avail
 #| fig-cap: "Summary of missingness of key demographic variables for analysis sample."
 
-FigureMiss3 <- gg_miss_var(MasterSheet5a %>% dplyr::select(
+FigureMiss3 <- gg_miss_var(MasterSheet5a |> dplyr::select(
   AgeAtSurgery,
   Sex,
   BMI,
@@ -2258,7 +2320,7 @@ Set variables for survival and logistic regression
 ComplicMaster <- bind_rows(
   ComplicResponse7,
   MasterCensor
-) %>% mutate(
+) |> mutate(
   Category = fct(
     Category_Value,
     levels = c(
@@ -2280,44 +2342,44 @@ ComplicMaster <- bind_rows(
       "Readmission"
       )
   )
-) %>% mutate(
+) |> mutate(
   OccurDelay = if_else(is.na(OccurDelay),90,OccurDelay)
-) %>% group_by( # grouping here
+) |> group_by( # grouping here
     TempIDPart    
-    ) %>% arrange(
+    ) |> arrange(
     DateofOccurrence,
     .by_group = TRUE
-    ) %>% arrange(
+    ) |> arrange(
     OccurDelay,
     .by_group = TRUE
-  ) %>% mutate(
+  ) |> mutate(
     RowNum = row_number()
-  )  %>% mutate(
+  )  |> mutate(
   DurationStart = case_when(
     RowNum > 1 ~ dplyr::lag(OccurDelay),
     .default = 0
   )
-  ) %>% mutate(
+  ) |> mutate(
     DurationDiff = as.numeric(OccurDelay - DurationStart)
-  ) %>% rename(
+  ) |> rename(
     DurationStop = "OccurDelay"
-  ) %>% relocate(
+  ) |> relocate(
     DurationStop, .after = DurationDiff
-  ) %>% mutate(
+  ) |> mutate(
     DurationStop1 = case_when(
       DurationDiff == 0 ~ DurationStop + 1,
       .default = DurationStop
       )
-    ) %>% mutate(
+    ) |> mutate(
   DurationStart1 = case_when(
     RowNum > 1 ~ dplyr::lag(DurationStop1),
     .default = 0
     ),
       DurationDiffLag = as.numeric(lag(DurationStop1) - DurationStart1),
   DurationDiff2 = as.numeric(DurationStop1 - DurationStart1)
-  ) %>% relocate(
+  ) |> relocate(
     DurationStop1, .after = DurationStart1
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
     TempIDPart,
     DurationStart1,
     DurationStop1,
@@ -2326,7 +2388,7 @@ ComplicMaster <- bind_rows(
     Category,
     RowNum,
     GroupCorrected
-  ) %>% ungroup() %>% mutate(
+  ) |> ungroup() |> mutate(
     Group1 = forcats::fct_recode(
       GroupCorrected,
       "RAS" = "1",
@@ -2340,10 +2402,10 @@ ComplicMaster <- bind_rows(
 ```{r}
 ComplicMaster2 <- left_join(
   ComplicMaster,
-  MasterSheet5a %>% filter(
+  MasterSheet5a |> filter(
     !(MockUpID == "157031left44551" & Surgeon == "B"),
     !(MockUpID == "412600right44923")
-      ) %>% dplyr::select(
+      ) |> dplyr::select(
     TempIDPart,
     Sex,
     AgeAtSurgery,
@@ -2357,15 +2419,15 @@ ComplicMaster2 <- left_join(
 ```
 
 ```{r}
-category_dataframes <- ComplicMaster %>%
-  group_split(Category) %>%
+category_dataframes <- ComplicMaster |>
+  group_split(Category) |>
   set_names(levels(ComplicMaster$Category))
 
-ComplicRevision <- ComplicResponse6a %>% filter(Revision == "Revision")
-ComplicReoperation <- ComplicResponse6a %>% filter(Reoperation == "Reoperation")
-ComplicReadmission <- ComplicResponse6a %>% filter(Readmission == "Readmission")
+ComplicRevision <- ComplicResponse6a |> filter(Revision == "Revision")
+ComplicReoperation <- ComplicResponse6a |> filter(Reoperation == "Reoperation")
+ComplicReadmission <- ComplicResponse6a |> filter(Readmission == "Readmission")
 
-MasterSheet6 <- MasterSheet5a %>% 
+MasterSheet6 <- MasterSheet5a |> 
   mutate(
     Bleed = if_else(TempIDPart %in% category_dataframes$Bleed$TempIDPart, "Yes", "No"),
     Thromboembolism = if_else(TempIDPart %in% category_dataframes$Thromboembolism$TempIDPart,"Yes","No"),
@@ -2404,7 +2466,7 @@ Descriptives for exposure and outcome variables were summarised into tables. Uni
 Set up input table for statistical analysis with only variables required for models.
 
 ```{r}
-MasterSheetKM <- MasterSheet6 %>% dplyr::select(
+MasterSheetKM <- MasterSheet6 |> dplyr::select(
   TempIDPart,
   PatientID2,
   Bleed:Group1,
@@ -2417,7 +2479,7 @@ MasterSheetKM <- MasterSheet6 %>% dplyr::select(
   ComorbidDiabetes,
   ComorbidCardiovascular,
   ComorbidAutoImmune
-) %>% dplyr::mutate(
+) |> dplyr::mutate(
   across(
     .cols = Bleed:Revision,
     .fns = ~case_when(
@@ -2425,75 +2487,71 @@ MasterSheetKM <- MasterSheet6 %>% dplyr::select(
       .default = NA
       ),
     .names = "{.col}Bin")
-) %>% left_join(
-  .,
-  ComplicMaster2 %>% group_by(
+) |> left_join(
+  ComplicMaster2 |> group_by(
   TempIDPart
-  ) %>% filter(
+  ) |> filter(
     Category == "InfectionSuperficial"
-    ) %>% dplyr::select(
+    ) |> dplyr::select(
       TempIDPart,
       DurationStop1
-    ) %>% slice_min(
+    ) |> slice_min(
       DurationStop1,
       n = 1),
   by = "TempIDPart"
-  ) %>% mutate(
+  ) |> mutate(
     DurationInfectSuper = if_else(is.na(DurationStop1),90,DurationStop1)
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
     -DurationStop1
-  ) %>% left_join(
-  .,
-  ComplicMaster2 %>% group_by(
+  ) |> left_join(
+  ComplicMaster2 |> group_by(
   TempIDPart
-  ) %>% filter(
+  ) |> filter(
     Category == "Stiffness"
-    ) %>% dplyr::select(
+    ) |> dplyr::select(
       TempIDPart,
       DurationStop1
-    ) %>% slice_min(
+    ) |> slice_min(
       DurationStop1,
       n = 1),
   by = "TempIDPart"
-  ) %>% mutate(
+  ) |> mutate(
     DurationStiff = if_else(is.na(DurationStop1),90,DurationStop1)
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
     -DurationStop1
-  ) %>% left_join(
-  .,
-  ComplicMaster2 %>% group_by(
+  ) |> left_join(
+  ComplicMaster2 |> group_by(
   TempIDPart
-  ) %>% filter(
+  ) |> filter(
     Category == "Readmission"
-    ) %>% dplyr::select(
+    ) |> dplyr::select(
       TempIDPart,
       DurationStop1
-    ) %>% slice_min(
+    ) |> slice_min(
       DurationStop1,
       n = 1),
   by = "TempIDPart"
-  ) %>% mutate(
+  ) |> mutate(
     DurationReadmit = if_else(is.na(DurationStop1),90,DurationStop1)
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
     -DurationStop1
-  ) %>% left_join(
-  .,
-  ComplicMaster2 %>% group_by(
+  ) |> left_join(
+  ComplicMaster2 |> group_by(
   TempIDPart
-  ) %>% filter(
+  ) |> filter(
     Category == "Thromboembolism"
-    ) %>% dplyr::select(
+    ) |> dplyr::select(
       TempIDPart,
       DurationStop1
-    ) %>% slice_min(
+    ) |> slice_min(
       DurationStop1,
       n = 1),
   by = "TempIDPart"
-  ) %>% mutate(
+  ) |> mutate(
     DurationThrombo = if_else(is.na(DurationStop1),90,DurationStop1)
-  ) %>% dplyr::select(
+  ) |> dplyr::select(
     -DurationStop1
-  ) %>% ungroup()
+  ) |> ungroup()
 ```
 
 The *ggdag* package (v`{r} utils::packageVersion("ggdag")` [@ggdag] was used to create and visualise directed acyclic graphs (in conjunction with *ggplot2*), with minimal adjustment sets to ensure correct specification of models to estimate the effect of Group on outcome variables.
@@ -2579,7 +2637,7 @@ DAGDuration <- ggdag::dagify(ProcedureDuration ~ GuidanceGroup + Sex + Age + BMI
 )
 
 # Create a tidy version of the DAG and apply custom labels
-tidy_dag1 <- tidy_dagitty(DAGDuration, layout = "auto") %>%
+tidy_dag1 <- tidy_dagitty(DAGDuration, layout = "auto") |>
   mutate(label = case_when(
     name == "ProcedureDuration" ~ "Duration of\n Procedure",
     name == "ComorbidSmoke" ~ "Smoking History",
@@ -2730,13 +2788,13 @@ knitr::knit_print(Figure7)
 ```{r}
 #| label: duration-subset
 
-Duration_Analysis <- MasterSheet6 %>% dplyr::select(PatientID2,
+Duration_Analysis <- MasterSheet6 |> dplyr::select(PatientID2,
                                                     ProcedureDuration,
                                                     Group1,
                                                     AgeAtSurgery,
                                                     Sex,
                                                     BMI,
-                                                    BilateralStatus) %>%
+                                                    BilateralStatus) |>
   mutate(
     BilateralStatus = forcats::fct(BilateralStatus,
                                    levels = )
@@ -2808,7 +2866,7 @@ DAGAE1 <- dagify(SSI ~ GuidanceGroup + Sex + BMI + ComorbidSmoke + ComorbidCVD +
 )
 
 # Create a tidy version of the DAG and apply custom labels
-tidy_dag2 <- tidy_dagitty(DAGAE1, layout = "auto") %>%
+tidy_dag2 <- tidy_dagitty(DAGAE1, layout = "auto") |>
   mutate(label = case_when(
     name == "SSI" ~ "SSI",
     name == "ComorbidSmoke" ~ "Smoking History",
@@ -3001,7 +3059,7 @@ DAGAE2 <- dagify(VTE ~ GuidanceGroup + Sex + BMI + Age + ComorbidSmoke + Comorbi
 )
 
 # Create a tidy version of the DAG and apply custom labels
-tidy_dag3 <- tidy_dagitty(DAGAE2, layout = "auto") %>%
+tidy_dag3 <- tidy_dagitty(DAGAE2, layout = "auto") |>
   mutate(label = case_when(
     name == "VTE" ~ "VTE",
     name == "Sex" ~ "Sex",
@@ -3176,7 +3234,7 @@ DAGAE3 <- dagify(Stiffness ~ GuidanceGroup + Sex + BMI + Age + ComorbidDiabetes,
 )
 
 # Create a tidy version of the DAG and apply custom labels
-tidy_dag4 <- tidy_dagitty(DAGAE3, layout = "auto") %>%
+tidy_dag4 <- tidy_dagitty(DAGAE3, layout = "auto") |>
   mutate(label = case_when(
     name == "Stiffness" ~ "Stiffness",
     name == "Sex" ~ "Sex",
@@ -3364,7 +3422,7 @@ DAGAE4 <- dagify(
 )
 
 # Create a tidy version of the DAG and apply custom labels
-tidy_dag5 <- tidy_dagitty(DAGAE4, layout = "auto") %>%
+tidy_dag5 <- tidy_dagitty(DAGAE4, layout = "auto") |>
   mutate(label = case_when(
     name == "ACRadmit" ~ "Readmission",
     name == "GuidanceGroup" ~ "Guidance Group",
@@ -3563,9 +3621,11 @@ control <- npsurvSS::create_arm(size=173,
 
 ```
 
-Table 16: Estimated power based on calculated incidences of Robot and Pre-Robot groups for superficial infection after total knee arthroplasty at 90 day follow up.
+
 
 ```{r}
+#| label: tbl-sampcalc
+#| tbl-cap: "Estimated power based on calculated incidences of Robot and Pre-Robot groups for superficial infection after total knee arthroplasty at 90 day follow up."
 #| echo: true
 
 
@@ -3586,21 +3646,21 @@ SampleSize_df <- data.frame(
 )
 
 # Create the gt table
-results_table <- SampleSize_df %>%
-  gt() %>%
+results_table <- SampleSize_df |>
+  gt() |>
   tab_header(
     title = "Power Analysis Results",
     subtitle = "Two-arm survival analysis"
-  ) %>%
+  ) |>
   fmt_number(
     columns = c(Power),
     decimals = 2
-  ) %>%
+  ) |>
   cols_label(
     Test = "Test Type",
     #TestNumber = "Test Number",
     Power = "Power"
-  ) %>%
+  ) |>
   tab_source_note(
     source_note = "Based on npsurvSS::power_two_arm() function"
   )
@@ -3627,8 +3687,7 @@ Table17 <- tbl_cross(
   margin = c("row")
 )
 
-as_flex_table(Table17) %>% flextable::set_table_properties(
-  .,
+as_flex_table(Table17) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -3650,16 +3709,15 @@ A flow chart of record retrieval, review and grouping was constructed using the 
 
 MasterList3 <- left_join(
   MasterList2,
-  MasterSheet1 %>% dplyr::select(
+  MasterSheet1 |> dplyr::select(
     TempIDFull,
     ProgressComment,
     ProgressIndicator,
     PotentialExclus
   ),
   by = "TempIDFull"
-) %>% left_join(
-  .,
-  MasterSheet6 %>% dplyr::select(
+) |> left_join(
+  MasterSheet6 |> dplyr::select(
     TempIDFull,
     Group1
   ),
@@ -3674,7 +3732,7 @@ JoinCheck <- anti_join(
   MasterList3, 
   MasterSheet6, 
   by = "TempIDFull"
-  ) %>% mutate(
+  ) |> mutate(
     Exclusion = case_when(
       #PotentialExclus == "Yes" ~ "Excluded after Review",
       SurgerySide == "Bilateral" ~ "Vendor Duplicate",
@@ -3691,16 +3749,16 @@ JoinCheck <- anti_join(
 ```{r}
 CONSORTInput <- left_join(
   MasterList3,
-  JoinCheck %>% dplyr::select(
+  JoinCheck |> dplyr::select(
     TempIDFull,
     Exclusion
     ),
   by = "TempIDFull"
-) %>% rename(
+) |> rename(
   exclusion1 = "Exclusion",
   trialno = "TempIDFull",
   arm3 = "Group1"
-) %>% mutate(
+) |> mutate(
   exclusion2 = case_when(
     PotentialExclus == "Yes" & str_detect(str_to_lower(ProgressComment),"dair|unicomp*|hemiarth*") ~ "Surgery Type",
     PotentialExclus == "Yes" & str_detect(str_to_lower(ProgressComment),"done") ~ "Cancellation",
@@ -3708,9 +3766,9 @@ CONSORTInput <- left_join(
     PotentialExclus == "Yes" & str_detect(str_to_lower(ProgressComment),"duplicate") ~ "Record duplicate",
     .default = NA_character_
   )
-) %>% mutate(
+) |> mutate(
   exclusion1 = ifelse(!is.na(exclusion2),NA_character_,exclusion1)
-) %>% mutate(
+) |> mutate(
   induction = ifelse(is.na(exclusion1),trialno,NA_character_)
 )
 ```
@@ -3753,17 +3811,16 @@ plot(ConsortPlot)
 #| tbl-cap: "Patient characteristics of analysis sample separated by Group."
 
 TableChar <- tbl_summary(
-  MasterSheet6 %>% dplyr::select(
+  MasterSheet6 |> dplyr::select(
     Group1,
     Sex:ComorbidCancer,
     BilateralStatus2
   ),
   by = Group1,
    missing = "no"
-) %>% add_overall()
+) |> add_overall()
 
-as_flex_table(TableChar) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableChar) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -3783,17 +3840,16 @@ as_flex_table(TableChar) %>% flextable::set_table_properties(
 #| tbl-cap: "Summary of procedure duration and adverse events separated by Group."
 
 TableOutcomes <- tbl_summary(
-  MasterSheet6 %>% dplyr::select(
+  MasterSheet6 |> dplyr::select(
     Group1,
     ProcedureDuration,
     Bleed:Revision
   ),
   by = Group1,
    missing = "no"
-) %>% add_overall()
+) |> add_overall()
 
-as_flex_table(TableOutcomes) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableOutcomes) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -3815,12 +3871,12 @@ The RAS group displayed {gtsummary::inline_text(TableOutcomes, variable = Delive
 #| label: tbl-rascomp
 #| tbl-cap: "Complications identified intraoperatively with RAS delivery."
 
-DeliveryComp <- ComplicResponse7 %>% filter(
+DeliveryComp <- ComplicResponse7 |> filter(
   Category_Value == "Delivery"
-) %>% dplyr::select(
+) |> dplyr::select(
   SurgeryDate,
   ComplicationNature
-) %>% gt::gt()
+) |> gt::gt()
 
 knitr::knit_print(DeliveryComp)
 
@@ -3907,8 +3963,7 @@ TableDuration <- tbl_regression(Duration_model,
                             ),
                estimate_fun = function(x) style_number(x, digits = 2), pvalue_fun = function(x) style_pvalue(x, digits = 3)) 
 
-as_flex_table(TableDuration) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableDuration) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -3954,7 +4009,7 @@ DurationPost <- avg_comparisons(
   Duration_model, 
   variables = list(Group1 = "pairwise"),
   type = "response",
-  re.form = NA) %>% gt::gt() %>%
+  re.form = NA) |> gt::gt() |>
   fmt_number(
     decimals = 2
   )
@@ -3973,20 +4028,20 @@ TableDurationSum <- avg_predictions(Duration_model,
                               by = "Group1",
                               re.form = NA,
                               conf_level = 0.95,
-                              type = "response") %>% mutate(
+                              type = "response") |> mutate(
                                 standarddev = case_when(
-                                  Group1 == "Pre-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis %>% filter(Group1 == "Pre-RAS")))),
-                                  Group1 == "Non-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis %>% filter(Group1 == "Non-RAS")))),
-                                  Group1 == "RAS" ~ std.error*(sqrt(nrow(Duration_Analysis %>% filter(Group1 == "RAS")))),
+                                  Group1 == "Pre-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Pre-RAS")))),
+                                  Group1 == "Non-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Non-RAS")))),
+                                  Group1 == "RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "RAS")))),
                                 )
-                              ) %>% dplyr::select(
+                              ) |> dplyr::select(
                                 Group1,
                                 estimate,
                                 standarddev,
                                 std.error,
                                 conf.low,
                                 conf.high
-                              ) %>% gt::gt() %>%
+                              ) |> gt::gt() |>
   fmt_number(
     decimals = 1
   )
@@ -4012,7 +4067,7 @@ However, a significant decrease was observed in the average procedure duration o
 #| tbl-cap: "Summary of adverse event incidence separated by Group"
 
 TableComp <- tbl_summary(
-  data = MasterSheet6 %>% dplyr::select(
+  data = MasterSheet6 |> dplyr::select(
     Group1,
     Bleed,
     Thromboembolism,
@@ -4031,10 +4086,9 @@ TableComp <- tbl_summary(
     
   ),
   by = Group1
-) %>% add_overall() %>% add_p() %>% add_q()
+) |> add_overall() |> add_p() |> add_q()
 
-as_flex_table(TableComp) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableComp) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -4050,7 +4104,7 @@ as_flex_table(TableComp) %>% flextable::set_table_properties(
 
 
 TableCov <- tbl_summary(
-  MasterSheetKM %>% dplyr::select(
+  MasterSheetKM |> dplyr::select(
     Group1,
     AgeAtSurgery,
     Sex,
@@ -4061,10 +4115,9 @@ TableCov <- tbl_summary(
   ),
   by = Group1,
   missing = "no"
-) %>% add_overall() %>% add_p()
+) |> add_overall() |> add_p()
 
-as_flex_table(TableCov) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableCov) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -4094,13 +4147,13 @@ test.ph4 = survival::cox.zph(ModelCox4)
 
 # Create a function to format the cox.zph results
 format_coxzph <- function(test, model_name) {
-  test$table %>%
-    as.data.frame() %>%
-    rownames_to_column("term") %>%
+  test$table |>
+    as.data.frame() |>
+    rownames_to_column("term") |>
     mutate(
       model = model_name,
       p.value = p
-    ) %>%
+    ) |>
     select(model, term, p.value)
 }
 
@@ -4114,29 +4167,28 @@ ph_test4 <- format_coxzph(test.ph4, "All-cause Readmission")
 all_ph_tests <- bind_rows(ph_test1, ph_test2, ph_test3, ph_test4)
 
 # Create the summary table
-ph_summary_table <- all_ph_tests %>%
+ph_summary_table <- all_ph_tests |>
   mutate(
     term = ifelse(term == "GLOBAL", "Global test", term)
-  ) %>%
+  ) |>
   pivot_wider(
     names_from = model,
     values_from = p.value
-  ) %>%
+  ) |>
   gtsummary::tbl_summary(
     by = term,
     type = everything() ~ "continuous",
     digits = everything() ~ 3,
     missing = "no",
     statistic = everything() ~ "{median}"
-  ) %>%
-  modify_header(all_stat_cols() ~ "**{level}**") %>%
-  #modify_spanning_header(all_stat_cols() ~ "**Model**") %>%
-  modify_caption("Proportional Hazards Assumption Test (p-values)") %>%
+  ) |>
+  modify_header(all_stat_cols() ~ "**{level}**") |>
+  #modify_spanning_header(all_stat_cols() ~ "**Model**") |>
+  modify_caption("Proportional Hazards Assumption Test (p-values)") |>
   modify_footnote(everything() ~ "Median p-value shown")
 
 # Display the table
-as_flex_table(ph_summary_table) %>% flextable::set_table_properties(
-  .,
+as_flex_table(ph_summary_table) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -4227,8 +4279,7 @@ TableCox <- tbl_merge(
 
 
 
-as_flex_table(TableCox) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableCox) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -4252,19 +4303,19 @@ tidy_cox3 <- broom::tidy(ModelCox3)
 tidy_cox4 <- broom::tidy(ModelCox4)
 
 # Add confidence intervals
-tidy_cox1 <- tidy_cox1 %>%
+tidy_cox1 <- tidy_cox1 |>
   mutate(conf.low = estimate - 1.96 * std.error,
          conf.high = estimate + 1.96 * std.error)
 
-tidy_cox2 <- tidy_cox2 %>%
+tidy_cox2 <- tidy_cox2 |>
   mutate(conf.low = estimate - 1.96 * std.error,
          conf.high = estimate + 1.96 * std.error)
 
-tidy_cox3 <- tidy_cox3 %>%
+tidy_cox3 <- tidy_cox3 |>
   mutate(conf.low = estimate - 1.96 * std.error,
          conf.high = estimate + 1.96 * std.error)
 
-tidy_cox4 <- tidy_cox4 %>%
+tidy_cox4 <- tidy_cox4 |>
   mutate(conf.low = estimate - 1.96 * std.error,
          conf.high = estimate + 1.96 * std.error)
 
@@ -4485,7 +4536,7 @@ AdjustCurveFig3 / AdjustCurveFig4
 #| tbl-cap: "Summary of survival from superficial infection up to 90 days after total knee arthroplasty by group*sex interaction and for males only compared between Group"
 
 # Step 1: Prepare the data
-MasterSheetKM_Clean <- MasterSheetKM_Clean %>%
+MasterSheetKM_Clean <- MasterSheetKM_Clean |>
   mutate(Group1Sex = interaction(Group1, Sex))
 
 # Step 2: Fit the Kaplan-Meier model
@@ -4493,32 +4544,32 @@ km_fit1 <- survfit(Surv(DurationInfectSuper, InfectionSuperficialBin) ~ Group1Se
                   data = MasterSheetKM_Clean)
 
 # Step 3: Create the table
-TableKM1 <- km_fit1 %>% 
+TableKM1 <- km_fit1 |> 
   tbl_survfit(
     times = c(14, 90),
     label_header = "**Days {time}**"
-  ) %>% 
-  add_p() %>%
-  add_n() %>%
+  ) |> 
+  add_p() |>
+  add_n() |>
   add_nevent()
 
 
 # Step 1: Prepare the data
-MasterSheetKM_Clean <- MasterSheetKM_Clean %>%
+MasterSheetKM_Clean <- MasterSheetKM_Clean |>
   mutate(Group1Sex = interaction(Group1, Sex))
 
 # Step 2: Fit the Kaplan-Meier model
 km_fit2 <- survfit(Surv(DurationInfectSuper, InfectionSuperficialBin) ~ Group1, 
-                  data = MasterSheetKM_Clean %>% filter(Sex == "Male"))
+                  data = MasterSheetKM_Clean |> filter(Sex == "Male"))
 
 # Step 3: Create the table
-TableKM2 <- km_fit2 %>% 
+TableKM2 <- km_fit2 |> 
   tbl_survfit(
     times = c(14, 90),
     label_header = "**Days {time}**"
-  ) %>% 
-  add_p() %>%
-  add_n() %>%
+  ) |> 
+  add_p() |>
+  add_n() |>
   add_nevent()
 
 
@@ -4527,8 +4578,7 @@ list(TableKM1,TableKM2),
 group_header = c("Group-Sex Interaction","Male Subset")
 )
 
-as_flex_table(TableKMComb) %>% flextable::set_table_properties(
-  .,
+as_flex_table(TableKMComb) |> flextable::set_table_properties(
   layout = "autofit",
   width = 0.15,
   align = "center",
@@ -4580,7 +4630,7 @@ results <- data.frame(
 )
 
 # Convert the data frame to a gt table
-results_table <- results %>%
+results_table <- results |>
   gt() |>
   tab_header(
     title = "Model Comparison: AIC and BIC"
