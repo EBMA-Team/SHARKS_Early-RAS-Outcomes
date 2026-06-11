@@ -1137,7 +1137,6 @@ MasterSheet1 <- bind_rows(
 Identifier columns were reviewed for coherence.
 
 ```{r}
-# Assuming your dataframe is called 'df' and the two identifier columns are 'id1' and 'id2'
 
 # Step 1: Create a new column that flags mismatches
 MasterSheetCheck <- MasterSheet1 |>
@@ -1814,15 +1813,27 @@ ReplaceTermFun <- function(String) {
 
 ```{r}
 
-ComplicResponse5 <- ComplicResponse4 |> mutate(
+# ComplicResponse5 <- ComplicResponse4 |> mutate(
+#     Term1 = case_when(
+#       TermLength < 5 & str_detect(Term,"\\d", negate = TRUE) ~ str_replace_all(Term, TargetTermsList, ReplaceTermFun),
+#       .default = Term
+#       )
+#   ) |> filter(
+#     str_detect(Term1,"\\d", negate = TRUE)
+#   )
+
+ComplicResponse5 <- ComplicResponse4 |>
+  rowwise() |>
+  mutate(
     Term1 = case_when(
-      TermLength < 5 & str_detect(Term,"\\d", negate = TRUE) ~ str_replace_all(Term, TargetTermsList, ReplaceTermFun),
+      TermLength < 5 & str_detect(Term, "\\d", negate = TRUE) ~ str_replace_all(Term, TargetTermsList, ReplaceTermFun),
       .default = Term
-      )
-  ) |> filter(
-    str_detect(Term1,"\\d", negate = TRUE)
+    )
+  ) |>
+  ungroup() |>
+  filter(
+    str_detect(Term1, "\\d", negate = TRUE)
   )
-  
 
 ```
 
@@ -2090,12 +2101,7 @@ MasterPROMs <- left_join(
 ),
 by = "TempIDFull"
 ) |> mutate(
-    Group1 = forcats::fct_recode(
-      GroupCorrected,
-      "RAS" = "1",
-      "Pre-RAS" = "2",
-      "Non-RAS" = "3"
-  )
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
 )
 
 ```
@@ -2384,12 +2390,7 @@ ComplicMaster <- bind_rows(
     RowNum,
     GroupCorrected
   ) |> ungroup() |> mutate(
-    Group1 = forcats::fct_recode(
-      GroupCorrected,
-      "RAS" = "1",
-      "Pre-RAS" = "2",
-      "Non-RAS" = "3"
-  )
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
   )
 
 ```
@@ -2438,12 +2439,7 @@ MasterSheet6 <- MasterSheet5a |>
     Readmission = if_else(TempIDPart %in% ComplicReadmission$TempIDPart,"Yes","No"),
     Reoperation = if_else(TempIDPart %in% ComplicReoperation$TempIDPart,"Yes","No"),
     Revision = if_else(TempIDPart %in% ComplicRevision$TempIDPart,"Yes","No"),
-    Group1 = forcats::fct_recode(
-      GroupCorrected,
-      "RAS" = "1",
-      "Pre-RAS" = "2",
-      "Non-RAS" = "3"
-    )
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
   )
   
 ```
@@ -3994,7 +3990,6 @@ knitr::knit_print(DurationFig)
 
 The model-predicted procedure duration conformed with the patterns visualised using the observed data @fig-duration-predict .
 
-Table 20A:
 
 ```{r}
 #| label: tbl-duration-posthoc
@@ -4016,7 +4011,7 @@ knitr::knit_print(DurationPost) #gt object, cant be displayed as_flex_table
 
 ```{r}
 #| label: tbl-duration-gamma
-#| tbl-cap: "Summary of gamma regression model to assess the effect of Group on procedure duration"
+#| tbl-cap: "Model-predictedprocedure duration by Group"
 
 # Calculate marginal means
 TableDurationSum <- avg_predictions(Duration_model, 
