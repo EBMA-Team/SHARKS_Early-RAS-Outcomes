@@ -73,6 +73,8 @@ The clarity and significance of the objectives have evolved over time. The origi
 
 ::: {#tbl-studyquestion}
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|              |                                                                                                                                                                                                                             |
++==============+=============================================================================================================================================================================================================================+
 | Component    | Study-Specific                                                                                                                                                                                                              |
 +--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Population   | In patients presenting with end-stage knee degeneration electing to undergo lower limb total joint arthroplasty                                                                                                             |
@@ -95,33 +97,33 @@ Study question as per study plan. Comparator updated **8-May-2024**
 
 This was summarised to the following aim in the HREC protocol;
 
--   To assess the clinical utility and cost metrics (where available) before and after the introduction of the robotic-assisted surgery (RAS) system (ROSA, Zimmer Biomet) into total knee arthroplasty in a public hospital setting.
+- To assess the clinical utility and cost metrics (where available) before and after the introduction of the robotic-assisted surgery (RAS) system (ROSA, Zimmer Biomet) into total knee arthroplasty in a public hospital setting.
 
--   Assess the effect of group on the total incidence of adverse events at up to 90 days follow up
+- Assess the effect of group on the total incidence of adverse events at up to 90 days follow up
 
--   Assess the effect of group on procedure duration
+- Assess the effect of group on procedure duration
 
 No hypotheses were explicitly stated in the protocol. It is recommended that the following be considered for inclusion in the manuscript (in an appropriate form);
 
 **Clinical hypotheses**
 
--   Robotic arthroplasty for total knee replacement provides equivalent or superior complications and patient-reported outcomes compared to non-robotic cases within the department
+- Robotic arthroplasty for total knee replacement provides equivalent or superior complications and patient-reported outcomes compared to non-robotic cases within the department
 
--   Robotic arthroplasty provides superior inputs for cost-benefit analysis relative to high-volume TKA in a public hospital setting
+- Robotic arthroplasty provides superior inputs for cost-benefit analysis relative to high-volume TKA in a public hospital setting
 
-    -   Length of stay (needs to be lower)
+  - Length of stay (needs to be lower)
 
-    -   Adverse events (needs to be equivalent or lower)
+  - Adverse events (needs to be equivalent or lower)
 
-    -   Operative/theatre time (needs to be lower)
+  - Operative/theatre time (needs to be lower)
 
-    -   Tray usage (sterilisation) (needs to be lower)
+  - Tray usage (sterilisation) (needs to be lower)
 
 **Statistical hypothesis**
 
--   When adjusted for covariates, is Group significantly associated with theatre duration?
+- When adjusted for covariates, is Group significantly associated with theatre duration?
 
--   When adjusted for covariates, is Group significantly associated with complication (incidence/survival); discharge readiness (LoS, destination) and/or PROMs at 90-day follow-up?
+- When adjusted for covariates, is Group significantly associated with complication (incidence/survival); discharge readiness (LoS, destination) and/or PROMs at 90-day follow-up?
 
 ### IDEAL Stage2b \[1\]: Definite evaluation
 
@@ -198,7 +200,8 @@ pacman::p_load(# Load required packages
   "wordcloud",
   "npsurvSS",
   "adjustedCurves",
-  "riskRegression"
+  "riskRegression",
+  "stopwords"
   )
 ```
 
@@ -400,13 +403,13 @@ An initial mastersheet was compiled by combining the following inputs;
 
 ### Hospital exports - Arthroplasty Activity
 
--   A report was requested from the hospital which was provided in a series of xls exports.
+- A report was requested from the hospital which was provided in a series of xls exports.
 
--   Filenames were extracted using *rbase* (v`{r} utils::packageVersion("base")`) [@base].
+- Filenames were extracted using *rbase* (v`{r} utils::packageVersion("base")`) [@base].
 
--   The *purrr* package (v`{r} utils::packageVersion("purrr")`) [@purrr] was used to loop over each file of the folder list, the data within each file were imported using the *readxl* package (v`{r} utils::packageVersion("readxl")`) [@readxl].
+- The *purrr* package (v`{r} utils::packageVersion("purrr")`) [@purrr] was used to loop over each file of the folder list, the data within each file were imported using the *readxl* package (v`{r} utils::packageVersion("readxl")`) [@readxl].
 
--   The dataframes were combined into one using *tidyverse* syntax (v`{r} utils::packageVersion("tidyverse")`) [@tidyverse].
+- The dataframes were combined into one using *tidyverse* syntax (v`{r} utils::packageVersion("tidyverse")`) [@tidyverse].
 
 ```{r}
 #| label: Master-Data-inputs-1
@@ -527,13 +530,13 @@ Hospital3a <- Hospital3 |> mutate(
 
 An initial grouping was constructed to organise the mastersheet for manual verification. Updated groupings as per description in section 4c of [Protocol](https://docs.google.com/document/d/1AkPAvu0a9wtJMC24GHEuPlU_0duDvfvz/edit?usp=sharing&ouid=109449971782917707335&rtpof=true&sd=true "HREC protocol").
 
--   Surgeons confirmed to be contributing to the SHARKS registry and using the implant associated with the RAS - "RAS";
+- Surgeons confirmed to be contributing to the SHARKS registry and using the implant associated with the RAS - "RAS";
 
--   Surgeons confirmed to be contributing to the SHARKS registry and *not* using the implant associated with the RAS - "Pre-RAS";
+- Surgeons confirmed to be contributing to the SHARKS registry and *not* using the implant associated with the RAS - "Pre-RAS";
 
--   Surgeons confirmed *not* to be contributors to the SHARKS registry, but using the implant associated with the RAS system - Group 1b (potential RAS cases)
+- Surgeons confirmed *not* to be contributors to the SHARKS registry, but using the implant associated with the RAS system - Group 1b (potential RAS cases)
 
--   All other cases - "Non-RAS"
+- All other cases - "Non-RAS"
 
 ```{r}
 #| label: Update-grouping
@@ -889,32 +892,48 @@ googlesheets4::sheet_write(
 
 The initial consolidated case list was re-imported back into R and reprocessed and a new MasterSheet (v3) was re-written back into the web-based master file. Within this table additional columns were added and formulae were written to apply certain criteria to establish the inclusion and grouping columns (see below) with the following criteria;
 
--   Revision arthroplasty \| Reoperation \| Not a total knee replacement \| unconfirmed surgery type
+- Revision arthroplasty \| Reoperation \| Not a total knee replacement \| unconfirmed surgery type
 
--   Not eligible for 3month followup (Surgery Date \>= 1-Mar-2023)
+- Not eligible for 3month followup (Surgery Date \>= 1-Mar-2023)
 
--   Case existence could be verified across at least two sources
+- Case existence could be verified across at least two sources
 
 The mastersheetv3 was split into separate tables for further chart review by the authors.
 
 ::: {#tbl-chartreview}
++---------------------+------------------------------+----------------------+
 |                     |                              |                      |
-|---------------------|------------------------------|----------------------|
++=====================+==============================+======================+
 | **Patient Details** | **Surgical 1**               | **Surgical 2**       |
++---------------------+------------------------------+----------------------+
 | ProgressIndicator   | Surgeon                      | Pathology            |
++---------------------+------------------------------+----------------------+
 | ProgressComment     | SurgerySide                  | AlignmentReferencing |
++---------------------+------------------------------+----------------------+
 | ComplicationForm    | Group                        | SoftTissueRelease    |
++---------------------+------------------------------+----------------------+
 | Height              | BilateralStatus              | FemurBrand           |
++---------------------+------------------------------+----------------------+
 | Weight              | SimultaneousBilateralSurgery | FemurFixation        |
++---------------------+------------------------------+----------------------+
 | Comorbidities       | Surgery_ProcedureName        | FemoralSize          |
++---------------------+------------------------------+----------------------+
 | DateOfInitialExam   | Operator                     | TibiaBrand           |
++---------------------+------------------------------+----------------------+
 | PatientID           | Approach                     | TibiaFixation        |
++---------------------+------------------------------+----------------------+
 | MockUpID            | Anaesthetic                  | TibialSize           |
++---------------------+------------------------------+----------------------+
 | SurgeryDate         | TourniquetType               | InsertThickness      |
++---------------------+------------------------------+----------------------+
 | Sex                 | Operation Start Time         | PatellaIntervention  |
++---------------------+------------------------------+----------------------+
 | DateofBirth         | Operation Finish Time        | PatellaType          |
++---------------------+------------------------------+----------------------+
 |                     |                              | PatellaSize          |
++---------------------+------------------------------+----------------------+
 |                     |                              | Constraint           |
++---------------------+------------------------------+----------------------+
 
 Chart Review Variables Group Pre-RAS and Non-RAS
 :::
@@ -1357,13 +1376,13 @@ FigureMiss1 / FigureMiss2
 
 The criteria for this study was procedure based - examining only cases that received a total knee replacement within the department. Inclusion criteria was confirmed by establishing the following during *chart review* (rounds 1 and 2);
 
--   Date of Surgery \< **1-Mar-2023**
+- Date of Surgery \< **1-Mar-2023**
 
--   Surgery type (arthroplasty)
+- Surgery type (arthroplasty)
 
 Exclusion criteria included;
 
--   Revision \| Reoperation \| Procedure other than knee arthroplasty \| Arthroplasty type (revision vs primary) could not be confirmed
+- Revision \| Reoperation \| Procedure other than knee arthroplasty \| Arthroplasty type (revision vs primary) could not be confirmed
 
 ## STROBE \[7\] Variables:
 
@@ -1375,21 +1394,21 @@ Group labels
 
 Grouping information was confirmed by chart review for the following additional variables;
 
--   Consultant surgeon
+- Consultant surgeon
 
--   Date of Surgery
+- Date of Surgery
 
--   Alignment delivery (robotic, navigation, manual instrumentation)
+- Alignment delivery (robotic, navigation, manual instrumentation)
 
--   Prosthesis system implanted
+- Prosthesis system implanted
 
 Following chart review 1, further processing was performed to confirm the grouping for each record included in the analysis.
 
--   Create corrected group label (1, 2, 3)
+- Create corrected group label (1, 2, 3)
 
--   Identify SHARKS and non-SHARKS cases (establish expectation of PROMs availability)
+- Identify SHARKS and non-SHARKS cases (establish expectation of PROMs availability)
 
--   Assess availabilty of complications data
+- Assess availabilty of complications data
 
 The initial state of the grouping variables was tabled using *gtsummary* (v`{r} utils::packageVersion("gtsummary")`) [@gtsummary] to ensure that the patterns were as expected.
 
@@ -2141,6 +2160,8 @@ Retrospective cohort analyses are subject to a number of biases as noted by (cit
 
 ::: {#tbl-biases}
 +-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                   |                                                                                                 |                           |                                                                                                                                                                  |
++===================+=================================================================================================+===========================+==================================================================================================================================================================+
 | # Bias            | # Definition                                                                                    | # Source                  | # Mitigation                                                                                                                                                     |
 |                   |                                                                                                 |                           |                                                                                                                                                                  |
 | Misclassification | The clinical notes are misinterpreted to place the case in the incorrect Group                  |                           | Clinical notes reviewed by multiple reviewers.                                                                                                                   |
@@ -2536,6 +2557,8 @@ A brief literature review was conducted to identify potential factors that shoul
 
 ::: {#tbl-adjustset}
 +--------------------+------------------------------------------+--------------+------------------------------+
+|                    |                                          |              |                              |
++====================+==========================================+==============+==============================+
 | Category           | Variable                                 | Source       | Available in present dataset |
 +--------------------+------------------------------------------+--------------+------------------------------+
 | Patient Factor     | Sex (Male)                               | Acuna et al  | ✅                           |
@@ -2580,11 +2603,11 @@ Summary of potential adjustment set for *Procedure Duration* retrieved from the 
 
 Other factors included within the present context included the following;
 
--   Bilateral surgery - considering the case mix of simultaneous bilateral surgeries
+- Bilateral surgery - considering the case mix of simultaneous bilateral surgeries
 
--   Operator - considering the teaching hospital context, it is not possible to rule out the effect of having a junior surgeon performing the procedure on longer operative duration.
+- Operator - considering the teaching hospital context, it is not possible to rule out the effect of having a junior surgeon performing the procedure on longer operative duration.
 
--   Implant brand was discarded from the present analysis due to the high variation in implant selection and the low numbers within certain implant categories.
+- Implant brand was discarded from the present analysis due to the high variation in implant selection and the low numbers within certain implant categories.
 
 ```{r}
 #| label: fig-dag-adjust
@@ -3170,19 +3193,19 @@ knitr::knit_print(Figure11)
 A literature review revealed a recent meta-analysis [@tibbo2019] of 35 cohort studies (48873 TKAs) and an incidence of 4% at up to 12 weeks postoperatively. There was insufficient evidence to determine the relationship between diabetes and smoking status on stiffness risk. A more recent cohort study [@owen2021] of 12735 cases also observed an incidence of 3.6% A summary of factors associated with postoperative stiffness is summarised below.
 
 ::: {#tbl-adust-stiffness}
-+----------+-------------+----------------------------+
-| Variable | Source      | Present in current dataset |
-+==========+=============+============================+
-| Sex      | Tibbo et al | ✅                         |
-+----------+-------------+----------------------------+
-| Age      | Tibbo et al | ✅                         |
-|          |             |                            |
-|          | Owen et al  |                            |
-+----------+-------------+----------------------------+
-| BMI      | Tibbo et al | ✅                         |
-+----------+-------------+----------------------------+
-| Diabetes | Owen et al  | ✅                         |
-+----------+-------------+----------------------------+
++-------------+-------------+----------------------------+
+| Variable    | Source      | Present in current dataset |
++=============+=============+============================+
+| Sex         | Tibbo et al | ✅                         |
++-------------+-------------+----------------------------+
+| Age         | Tibbo et al | ✅                         |
+|             |             |                            |
+|             | Owen et al  |                            |
++-------------+-------------+----------------------------+
+| BMI         | Tibbo et al | ✅                         |
++-------------+-------------+----------------------------+
+| Diabetes    | Owen et al  | ✅                         |
++-------------+-------------+----------------------------+
 
 Summmary of potential factors associated with **stiffness** after total knee arthroplasty.
 :::
@@ -4713,13 +4736,19 @@ The key results can be summarised as follows;
 The limitations of the analysis can be summarised in the table below and should be prioritised for inclusion in the manuscript. Further work may be required to draw on existing literature to strengthen the argument for impact and/or mitigation measures.
 
 ::: {#tbl-limitations}
-| Component | Limitation | Impact | Mitigation |
-|----|----|----|----|
-| Setting | Public hospital with highly variable surgeon group | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment. | Temper language with respect to conclusions and causality of differences observed between Groups. |
-| Design | Retrospective cohort analysis with inherent biases | Information bias may change the distribution of outcomes between groups and lead to misleading results | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately. |
-| Data 1 | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others. | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed. |
-| Data 2 | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis | The robot RAS introduction could not be fully assessed for all adverse events. | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period. |
-| Methods | Model fitting was challenging for some outcome measures and may need further refinement. | The procedure duration model in particular may present erroneous results and should be interpreted cautiously. | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work. |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Component      | Limitation                                                                                                                   | Impact                                                                                                                                                   | Mitigation                                                                                                                                                    |
++================+==============================================================================================================================+==========================================================================================================================================================+===============================================================================================================================================================+
+| Setting        | Public hospital with highly variable surgeon group                                                                           | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.       | Temper language with respect to conclusions and causality of differences observed between Groups.                                                             |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Design         | Retrospective cohort analysis with inherent biases                                                                           | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                   | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                             |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 1         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches               | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others. | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed. |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 2         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis | The robot RAS introduction could not be fully assessed for all adverse events.                                                                           | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                    |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Methods        | Model fitting was challenging for some outcome measures and may need further refinement.                                     | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                           | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                |
++----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Summary of key limitations of the presented analysis
 :::
