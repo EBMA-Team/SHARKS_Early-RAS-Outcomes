@@ -9213,8 +9213,11 @@
     }
   },
   "files": {
+    ".RData": {
+      "checksum": "598de293b622ce7c758f03ec79e2251f"
+    },
     ".secrets/c13dc354db9600c8cd9b2bd868d1bf25_cscholes@ebma.com.au": {
-      "checksum": "6c4ce08256ba73b7a1dbff94bc49b649"
+      "checksum": "57747ecc94b0d8cfe86ffc7af2f07b8f"
     },
     "_quarto.yml": {
       "checksum": "58eb0b797a13c204188d5d3a00ed7b85"
@@ -9225,14 +9228,140 @@
     "EarlyOutcomesROSAq3.docx": {
       "checksum": "ca59d6bceb8dc243c30e6b010e0079fa"
     },
+    "EarlyOutcomesROSAq3.html": {
+      "checksum": "1036220435b20ed018e4b37a51359004"
+    },
     "EarlyOutcomesROSAq3.qmd": {
-      "checksum": "6265aefe018f11541c6f3085ae40996e"
+      "checksum": "19b5c5a8f33cdc1da076b881d0722095"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-allcause-1.png": {
+      "checksum": "61835f110aed0b7bf4250bde86446d9b"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-infect-1.png": {
+      "checksum": "2e11dc9fcbd9f8e1fd9c4f20f8e09229"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-stiffness-1.png": {
+      "checksum": "c4e217ea4c078fb52f39398583e8a095"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-vte-1.png": {
+      "checksum": "097ac0f14a768e775358a937f000f272"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjustcurve1-1.png": {
+      "checksum": "52733a68a815a4a3a45537e725554c91"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adjustcurve2-1.png": {
+      "checksum": "a3b1dbf7848189f8184838197b6cdba2"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-adverse-coxph-1.png": {
+      "checksum": "eea55a56742dc33907224fd0fdd0e632"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-bmi-spline-1.png": {
+      "checksum": "e778e4b421ec0d1b45a2c24939ac0333"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-complicfreq-1.png": {
+      "checksum": "af316da734243216ee6a8f4f9e190dbe"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-complicfreq2-1.png": {
+      "checksum": "a8990078008b56ae0baf1269b9e2e01e"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-adjust-1.png": {
+      "checksum": "4a41f88e0f415de2ac20f024c09ee592"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-allcause-1.png": {
+      "checksum": "9c4fc4c831b7c88896c232cbe0016083"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-infect-1.png": {
+      "checksum": "d8698c2939b0dd4d45a9f22db2a41da6"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-minadjust-1.png": {
+      "checksum": "8befd0806acc98425e8a3ecd7d808335"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-stiffness-1.png": {
+      "checksum": "7a1453ca8afb0e6ed4f1bdea1c506e95"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-dag-vte-1.png": {
+      "checksum": "be89569e9c709aaa02f38d46a4422a39"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-1.png": {
+      "checksum": "eee94f01ab344d50b3bfee03b7d5d53c"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-dist-1.png": {
+      "checksum": "345b3ecd413f5f8a0e4f804528ce7f60"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-duration-predict-1.png": {
+      "checksum": "015ad79e22a69dd42961ab3a05d67f7f"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-duration2-1.png": {
+      "checksum": "babaffe28d290a786ccd28fb7442feab"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-gamma-comp-1.png": {
+      "checksum": "d8f9e9990ef6b722f85a72568202e1e9"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-gamma-comp-residuals-1.png": {
+      "checksum": "a9adaa4f4a5cd06ca8c4c9c9842bf108"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-keyvar-avail-1.png": {
+      "checksum": "8b1f5ca78c4e8ed5781ba931eb3a176c"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-missing-1.png": {
+      "checksum": "ea9ea9259591839b78b9f05e54ff24c0"
+    },
+    "EarlyOutcomesROSAq3_files/figure-html/fig-strobeflow-1.png": {
+      "checksum": "37ce8800f50eea650102fbcd0f0b2115"
+    },
+    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap-icons.css": {
+      "checksum": "2318f137d201fbf51601fa0faba6bef7"
+    },
+    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap-icons.woff": {
+      "checksum": "1a51dfbe5467607389d603c02a77cd10"
+    },
+    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap.min.css": {
+      "checksum": "4bfe2f5e388530ecd1905e78073e75d6"
+    },
+    "EarlyOutcomesROSAq3_files/libs/bootstrap/bootstrap.min.js": {
+      "checksum": "e2b09c06f0e714b6144a6788a28e3950"
+    },
+    "EarlyOutcomesROSAq3_files/libs/clipboard/clipboard.min.js": {
+      "checksum": "15f52a1ee547f2bdd46e56747332ca2d"
+    },
+    "EarlyOutcomesROSAq3_files/libs/pagedtable-1.1/css/pagedtable.css": {
+      "checksum": "7773d8ddc5fe6c5adbde2349b933127f"
+    },
+    "EarlyOutcomesROSAq3_files/libs/pagedtable-1.1/js/pagedtable.js": {
+      "checksum": "8b657fbd2add193c16394a3f8339d3cf"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/anchor.min.js": {
+      "checksum": "91bcf6cd1fd88fec3f109811e5fc3546"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/popper.min.js": {
+      "checksum": "3a4a291ccf3f1ea0f82b641542fd3827"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/quarto-syntax-highlighting.css": {
+      "checksum": "ab2b9e94a89b131e869fd951d6355545"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/quarto.js": {
+      "checksum": "2ca82ae8ee1e5762d249c6b6c0802e30"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/tippy.css": {
+      "checksum": "ebd6f8ce46a677e1a4f5f8a8317109a9"
+    },
+    "EarlyOutcomesROSAq3_files/libs/quarto-html/tippy.umd.min.js": {
+      "checksum": "d828775275749701b48bd9d958814111"
+    },
+    "EarlyOutcomesROSAq3_files/libs/tabwid-1.1.3/tabwid.css": {
+      "checksum": "d437ce2bfe7051efe499172acb799f29"
+    },
+    "EarlyOutcomesROSAq3_files/libs/tabwid-1.1.3/tabwid.js": {
+      "checksum": "cd143f89d17ebc75a4f64885def2b8d4"
     },
     "grateful-refs.bib": {
-      "checksum": "62514d0d182e9d1dfdd936c9bb585d11"
+      "checksum": "776aac3bb8fe22f13ec58e2e223f44c4"
     },
     "LICENSE": {
       "checksum": "3a3f3cea56febea828890847e3cb11d7"
+    },
+    "QEII_SVRpart2_ROSA Comparison.png": {
+      "checksum": "26cb268c35d875f5334406086c158b60"
     },
     "README.md": {
       "checksum": "bd5719a0e96b0234c492057afaaca99b"
