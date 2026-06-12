@@ -195,6 +195,7 @@ pacman::p_load(# Load required packages
   "naniar",
   "quantreg",
   "broom",
+  "broom.helpers",
   "epoxy",
   "flextable",
   "wordcloud",
@@ -202,6 +203,7 @@ pacman::p_load(# Load required packages
   "adjustedCurves",
   "riskRegression",
   "stopwords"
+
   )
 ```
 

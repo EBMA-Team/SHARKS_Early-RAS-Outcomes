@@ -1243,6 +1243,42 @@
         "RemoteSha": "1.0.13"
       }
     },
+    "broom.helpers": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "broom.helpers",
+        "Title": "Helpers for Model Coefficients Tibbles",
+        "Version": "1.22.0",
+        "Authors@R": "c(\n    person(\"Joseph\", \"Larmarange\", , \"joseph@larmarange.net\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0001-7097-700X\")),\n    person(\"Daniel D.\", \"Sjoberg\", , \"danield.sjoberg@gmail.com\", role = \"aut\",\n           comment = c(ORCID = \"0000-0003-0862-2018\"))\n  )",
+        "Description": "Provides suite of functions to work with regression model\n    'broom::tidy()' tibbles.  The suite includes functions to group\n    regression model terms by variable, insert reference and header rows\n    for categorical variables, add variable labels, and more.",
+        "License": "GPL (>= 3)",
+        "URL": "https://larmarange.github.io/broom.helpers/,\nhttps://github.com/larmarange/broom.helpers",
+        "BugReports": "https://github.com/larmarange/broom.helpers/issues",
+        "Depends": "R (>= 4.1)",
+        "Imports": "broom (>= 0.8), cards, cli, dplyr (>= 1.1.0), labelled,\nlifecycle, purrr, rlang (>= 1.0.1), stats, stringr, tibble,\ntidyr, tidyselect",
+        "Suggests": "betareg, biglm, brms (>= 2.13.0), broom.mixed, cmprsk, covr,\ndatasets, effects, emmeans, fixest (>= 0.10.0), forcats, gam,\ngee, geepack, ggplot2, ggeffects (>= 1.3.2), ggstats (>=\n0.2.1), glmmTMB, glmtoolbox, glue, gt, gtsummary (>= 2.0.0),\nknitr, lavaan, lfe, lme4 (>= 1.1.28), logitr (>= 0.8.0),\nmarginaleffects (>= 0.21.0), margins, MASS, mgcv, mice, mmrm\n(>= 0.3.6), multgee, nnet, ordinal, parameters, parsnip,\npatchwork, plm, pscl, quantreg, rmarkdown, rstanarm, scales,\nspelling, survey, survival, testthat (>= 3.0.0), tidycmprsk,\nVGAM, svyVGAM",
+        "VignetteBuilder": "knitr",
+        "RdMacros": "lifecycle",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "LazyData": "true",
+        "RoxygenNote": "7.3.3",
+        "Config/testthat/edition": "3",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-09-17 09:06:13 UTC; josep",
+        "Author": "Joseph Larmarange [aut, cre] (ORCID:\n    <https://orcid.org/0000-0001-7097-700X>),\n  Daniel D. Sjoberg [aut] (ORCID:\n    <https://orcid.org/0000-0003-0862-2018>)",
+        "Maintainer": "Joseph Larmarange <joseph@larmarange.net>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-09-17 10:00:02 UTC",
+        "Built": "R 4.4.3; ; 2025-10-08 04:44:24 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "broom.helpers",
+        "RemoteRef": "broom.helpers",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteSha": "1.22.0"
+      }
+    },
     "bslib": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -4683,6 +4719,44 @@
         "Repository": "CRAN",
         "Date/Publication": "2023-08-29 22:20:02 UTC",
         "Built": "R 4.4.0; ; 2024-04-23 00:24:00 UTC; windows"
+      }
+    },
+    "labelled": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "labelled",
+        "Type": "Package",
+        "Title": "Manipulating Labelled Data",
+        "Version": "2.16.0",
+        "Maintainer": "Joseph Larmarange <joseph@larmarange.net>",
+        "Authors@R": "c(\n  person(\"Joseph\", \"Larmarange\", email = \"joseph@larmarange.net\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0001-7097-700X\")),\n  person(\"Daniel\", \"Ludecke\", role = \"ctb\"),\n  person(\"Hadley\", \"Wickham\", role = \"ctb\"),\n  person(\"Michal\", \"Bojanowski\", role = \"ctb\"),\n  person(\"François\", \"Briatte\", role = \"ctb\")\n  )",
+        "Description": "Work with labelled data imported from 'SPSS'\n    or 'Stata' with 'haven' or 'foreign'. This package\n    provides useful functions to deal with \"haven_labelled\" and\n    \"haven_labelled_spss\" classes introduced by 'haven' package.",
+        "License": "GPL (>= 3)",
+        "Encoding": "UTF-8",
+        "Depends": "R (>= 3.2)",
+        "Imports": "haven (>= 2.4.1), cli, dplyr (>= 1.1.0), lifecycle, rlang (>=\n1.1.0), vctrs, stringr, tidyr (>= 1.3.0), tidyselect",
+        "Suggests": "gt, knitr, rmarkdown, purrr, questionr, snakecase, spelling,\nsurvey, testthat (>= 3.2.0)",
+        "Enhances": "memisc",
+        "URL": "https://larmarange.github.io/labelled/,\nhttps://github.com/larmarange/labelled",
+        "BugReports": "https://github.com/larmarange/labelled/issues",
+        "VignetteBuilder": "knitr",
+        "LazyData": "true",
+        "RoxygenNote": "7.3.3",
+        "Language": "en-US",
+        "Config/testthat/edition": "3",
+        "Config/Needs/check": "memisc",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-10-22 16:33:32 UTC; josep",
+        "Author": "Joseph Larmarange [aut, cre] (ORCID:\n    <https://orcid.org/0000-0001-7097-700X>),\n  Daniel Ludecke [ctb],\n  Hadley Wickham [ctb],\n  Michal Bojanowski [ctb],\n  François Briatte [ctb]",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-10-22 17:00:02 UTC",
+        "Built": "R 4.4.3; ; 2025-10-23 23:51:20 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "labelled",
+        "RemoteRef": "labelled",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteSha": "2.16.0"
       }
     },
     "lattice": {
@@ -9229,7 +9303,7 @@
       "checksum": "1036220435b20ed018e4b37a51359004"
     },
     "EarlyOutcomesROSAq3.qmd": {
-      "checksum": "19b5c5a8f33cdc1da076b881d0722095"
+      "checksum": "7dfe9f10845ca8b4d69be54b39e432d6"
     },
     "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-allcause-1.png": {
       "checksum": "61835f110aed0b7bf4250bde86446d9b"
