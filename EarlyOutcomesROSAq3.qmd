@@ -196,6 +196,7 @@ pacman::p_load(# Load required packages
   "quantreg",
   "broom",
   "broom.helpers",
+  "broom.mixed",
   "epoxy",
   "flextable",
   "wordcloud",

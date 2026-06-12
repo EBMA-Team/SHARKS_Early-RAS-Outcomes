@@ -1279,6 +1279,39 @@
         "RemoteSha": "1.22.0"
       }
     },
+    "broom.mixed": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "broom.mixed",
+        "Type": "Package",
+        "Title": "Tidying Methods for Mixed Models",
+        "Version": "0.2.9.7",
+        "Authors@R": "c(\n    person(\"Ben\", \"Bolker\", email = \"bolker@mcmaster.ca\",\n        role = c(\"aut\", \"cre\"),\n        comment=c(ORCID=\"0000-0002-2127-0443\")),\n    person(\"David\", \"Robinson\", email = \"admiral.david@gmail.com\",\n        role = \"aut\"),\n    person(\"Dieter\", \"Menne\", role = \"ctb\"),\n    person(\"Jonah\", \"Gabry\", role = \"ctb\"),\n    person(\"Paul\", \"Buerkner\", role = \"ctb\"),\n    person(\"Christopher\", \"Hua\", role = \"ctb\"),\n    person(\"William\", \"Petry\", role = \"ctb\",\n       comment=c(ORCID=\"0000-0002-5230-5987\")),\n    person(\"Joshua\", \"Wiley\", role = \"ctb\",\n       comment=c(ORCID=\"0000-0002-0271-6702\")),\n    person(\"Patrick\", \"Kennedy\", role = \"ctb\"),\n    person(\"Eduard\", \"Szöcs\", role = \"ctb\",\n       comment=c(ORCID = \"0000-0001-5376-1194\", sponsor = \"BASF SE\")),\n    person(\"Indrajeet\", \"Patil\", role=\"ctb\"),\n    person(\"Vincent\", \"Arel-Bundock\",\n          email = \"vincent.arel-bundock@umontreal.ca\",\n          role = \"ctb\",\n      comment = c(ORCID = \"0000-0003-2042-7063\")),\n    person(\"Bill\", \"Denney\", role = \"ctb\"),\n    person(\"Cory\", \"Brunson\", role = \"ctb\"),\n    person(\"Joe\", \"Wasserman\", role = \"ctb\",\n        comment = c(ORCID = \"0000-0002-9705-1853\")),\n    person(\"Alexey\", \"Stukalov\", role = \"ctb\"),\n    person(\"Matthieu\", \"Bruneaux\", role = \"ctb\")\n    )",
+        "Maintainer": "Ben Bolker <bolker@mcmaster.ca>",
+        "Description": "Convert fitted objects from various R mixed-model packages\n    into tidy data frames along the lines of the 'broom' package.\n    The package provides three\n    S3 generics for each model: tidy(), which summarizes a model's statistical findings such as\n    coefficients of a regression; augment(), which adds columns to the original\n    data such as predictions, residuals and cluster assignments; and glance(), which\n    provides a one-row summary of model-level statistics.",
+        "Imports": "broom, coda (>= 0.19-4.1), dplyr, forcats, methods, nlme,\npurrr, stringr, tibble, tidyr, furrr",
+        "Suggests": "brms, dotwhisker, knitr, testthat, gamlss, gamlss.data,\nggplot2, GLMMadaptive, glmmADMB, glmmTMB, lmerTest, lme4,\nMatrix, MCMCglmm, mediation, mgcv, mice, ordinal, pander,\npbkrtest, posterior, rstan, rstanarm, rstantools, R2jags, TMB,\nrmarkdown",
+        "URL": "https://github.com/bbolker/broom.mixed",
+        "BugReports": "https://github.com/bbolker/broom.mixed/issues",
+        "License": "GPL-3",
+        "Encoding": "UTF-8",
+        "Additional_repositories": "http://bbolker.github.io/drat",
+        "VignetteBuilder": "knitr",
+        "RoxygenNote": "7.3.3",
+        "NeedsCompilation": "no",
+        "Packaged": "2026-02-16 21:59:45 UTC; bolker",
+        "Author": "Ben Bolker [aut, cre] (ORCID: <https://orcid.org/0000-0002-2127-0443>),\n  David Robinson [aut],\n  Dieter Menne [ctb],\n  Jonah Gabry [ctb],\n  Paul Buerkner [ctb],\n  Christopher Hua [ctb],\n  William Petry [ctb] (ORCID: <https://orcid.org/0000-0002-5230-5987>),\n  Joshua Wiley [ctb] (ORCID: <https://orcid.org/0000-0002-0271-6702>),\n  Patrick Kennedy [ctb],\n  Eduard Szöcs [ctb] (ORCID: <https://orcid.org/0000-0001-5376-1194>,\n    sponsor: BASF SE),\n  Indrajeet Patil [ctb],\n  Vincent Arel-Bundock [ctb] (ORCID:\n    <https://orcid.org/0000-0003-2042-7063>),\n  Bill Denney [ctb],\n  Cory Brunson [ctb],\n  Joe Wasserman [ctb] (ORCID: <https://orcid.org/0000-0002-9705-1853>),\n  Alexey Stukalov [ctb],\n  Matthieu Bruneaux [ctb]",
+        "Repository": "CRAN",
+        "Date/Publication": "2026-02-17 06:11:05 UTC",
+        "Built": "R 4.4.3; ; 2026-03-06 05:06:34 UTC; windows",
+        "RemoteType": "standard",
+        "RemotePkgRef": "broom.mixed",
+        "RemoteRef": "broom.mixed",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemoteSha": "0.2.9.7"
+      }
+    },
     "bslib": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -1775,6 +1808,28 @@
         "Date/Publication": "2024-05-19 14:50:02 UTC",
         "Built": "R 4.4.0; x86_64-w64-mingw32; 2024-05-22 23:51:10 UTC; windows",
         "Archs": "x64"
+      }
+    },
+    "coda": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "coda",
+        "Version": "0.19-4.1",
+        "Date": "2020-09-30",
+        "Title": "Output Analysis and Diagnostics for MCMC",
+        "Authors@R": "c(person(\"Martyn\", \"Plummer\", role=c(\"aut\",\"cre\",\"trl\"),\n       \t            email=\"martyn.plummer@gmail.com\"),\n             person(\"Nicky\", \"Best\", role=\"aut\"),\n             person(\"Kate\", \"Cowles\", role=\"aut\"),\n             person(\"Karen\", \"Vines\", role=\"aut\"),\n             person(\"Deepayan\", \"Sarkar\", role=\"aut\"),\n\t     person(\"Douglas\", \"Bates\", role=\"aut\"),\n             person(\"Russell\", \"Almond\", role=\"aut\"),\n\t     person(\"Arni\", \"Magnusson\", role=\"aut\"))",
+        "Depends": "R (>= 2.14.0)",
+        "Imports": "lattice",
+        "Description": "Provides functions for summarizing and plotting the\n\toutput from Markov Chain Monte Carlo (MCMC) simulations, as\n\twell as diagnostic tests of convergence to the equilibrium\n\tdistribution of the Markov chain.",
+        "License": "GPL (>= 2)",
+        "NeedsCompilation": "no",
+        "Packaged": "2024-01-31 09:50:53 UTC; ripley",
+        "Author": "Martyn Plummer [aut, cre, trl],\n  Nicky Best [aut],\n  Kate Cowles [aut],\n  Karen Vines [aut],\n  Deepayan Sarkar [aut],\n  Douglas Bates [aut],\n  Russell Almond [aut],\n  Arni Magnusson [aut]",
+        "Maintainer": "Martyn Plummer <martyn.plummer@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2024-01-31 09:52:36 UTC",
+        "Built": "R 4.4.0; ; 2024-04-27 00:39:44 UTC; windows"
       }
     },
     "codetools": {
@@ -9303,7 +9358,7 @@
       "checksum": "1036220435b20ed018e4b37a51359004"
     },
     "EarlyOutcomesROSAq3.qmd": {
-      "checksum": "7dfe9f10845ca8b4d69be54b39e432d6"
+      "checksum": "b7d939c658b252048e1980447bfefd23"
     },
     "EarlyOutcomesROSAq3_files/figure-html/fig-adjust-allcause-1.png": {
       "checksum": "61835f110aed0b7bf4250bde86446d9b"
