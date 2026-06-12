@@ -12,7 +12,7 @@ format:
   docx: 
     toc: true
     number-sections: true
-    toc-depth: 2
+    toc-depth: 3
   html:
     df-print: paged
     code-fold: true
@@ -2763,7 +2763,7 @@ knitr::knit_print(Figure6)
 
 ```
 
-The procedure duration outcome is characterised by positive values, overdispersion (high variance) and right skewness (some cases take well above average) (Figure 7). The *gamma* distribution is a continuous probability distribution that is suitable for modelling positive values that are skewed and has been previously demonstrated to be a robust choice in skewed medical data [@malehi2015]. The master table was subset for procedure duration analysis. The dataset is also at risk of pseudoreplication due to the presence of multiple data entries for the same patient with bilateral procedures. A mixed-effects gamma regression model ("log" link function) with the minimal adjustment set as identified in the DAG, was applied using *lme4* package package (v`{r} utils::packageVersion("lme4")`) [@lme4]. Model predictions and post-comparisons between levels of fixed effects were calculated using the *marginaleffects* package package (v`{r} utils::packageVersion("marginaleffects")` [@marginaleffects].
+The procedure duration outcome is characterised by positive values, overdispersion (high variance) and right skewness (some cases take substantially longer than the group median) (@fig-duration-dist and @fig-duration-predict), as well as overdispersion (variance exceeding the average, particularly in the pre-RAS group). Although ordinary least squares is a popular regression technique for continuous data, these features of the dataset render this approach inappropriate. The *gamma* distribution is a continuous probability distribution that is suitable for modelling positive values that are skewed and has been previously demonstrated to be a robust choice in skewed medical data [@malehi2015]. The master table was subset for procedure duration analysis. The dataset is also at risk of pseudoreplication due to the presence of multiple data entries for the same patient with bilateral procedures. To account for this non-independence, a patient-level random interecept was included in the model specific (*1\|PatientID*), allowing each patient's repeated observations to share a common baseline, while fixed efffects estimated the population-average effect of Group on procedure duration. A mixed-effects gamma regression model ("log" link function) with the minimal adjustment set as identified in the DAG, was applied using *lme4* package (v`{r} utils::packageVersion("lme4")`). The log link was selected over alternative functions within the gamma family (inverse, identify, square root), based on model fit. All four link functions were compared using Akaike information criteria and Bayesian information criteria. The rationale and analysis for the selection are presented in STROBE \[17\] Other Analyses. Model predictions and post-comparisons between levels of fixed effects were calculated using the *marginaleffects* package package (v`{r} utils::packageVersion("marginaleffects"))`.
 
 ```{r}
 #| label: fig-duration-dist
@@ -4706,6 +4706,196 @@ p4 <- plot_residuals(model_sqrt, "Square Root Link")
 
 
 patchwork::wrap_plots(p1,p2,p3,p4)
+
+```
+
+Four link functions (log, inverse, identity and square root) within the gamma family were compared to assess the robustness of the primary model specification. Model fit was evaluated using the Akaike information criterion (AIC) and Bayesion information criterion (BIC) with the log function producing the lowest values (@tbl-gamma-comp). The marginal predicted distributions, as well as the residuals, across the three study groups were visually consistent across all link functions ( @fig-gamma-comp and @fig-gamma-comp-residuals). These results indicated that the substantive finding that procedure duration did not differ between groups, was not sensitive to the link function choice.
+
+### Model sensitivity - Surgeon
+
+```{r}
+# Add Surgeon to the Duration_Analysis subset
+Duration_Analysis_Surgeon <- MasterSheet6 |> dplyr::select(
+  PatientID2,
+  ProcedureDuration,
+  Group1,
+  BilateralStatus,
+  Surgeon
+) |>
+  mutate(
+    BilateralStatus = forcats::fct(BilateralStatus,
+                                   levels = c("Unilateral", "Bilateral"))
+  )
+```
+
+```{r}
+# Fit crossed random effects model with Surgeon and PatientID2
+Duration_model_surgeon <- lme4::glmer(
+  ProcedureDuration ~ Group1 + BilateralStatus + (1|PatientID2) + (1|Surgeon),
+  family = Gamma(link = "log"),
+  data = Duration_Analysis_Surgeon,
+  control = lme4::glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
+)
+```
+
+```{r}
+# AIC and BIC comparison between primary model and surgeon random effect model
+AIC_surgeon <- AIC(Duration_model, Duration_model_surgeon)
+BIC_surgeon <- BIC(Duration_model, Duration_model_surgeon)
+
+surgeon_comparison <- data.frame(
+  Model = c("Primary (PatientID2 only)", "Surgeon random effect (PatientID2 + Surgeon)"),
+  AIC = AIC_surgeon[, 2],
+  BIC = BIC_surgeon[, 2]
+)
+
+surgeon_comparison_table <- surgeon_comparison |>
+  gt() |>
+  tab_header(
+    title = "Model Comparison: Primary vs Surgeon Random Effect"
+  ) |>
+  cols_label(
+    Model = "Model",
+    AIC = "AIC",
+    BIC = "BIC"
+  )
+
+knitr::knit_print(surgeon_comparison_table)
+```
+
+```{r}
+# Regression table for surgeon random effect model
+TableDuration_Surgeon <- tbl_regression(
+  Duration_model_surgeon,
+  show_single_row = "BilateralStatus",
+  label = list(BilateralStatus ~ "Bilateral"),
+  estimate_fun = function(x) style_number(x, digits = 2),
+  pvalue_fun = function(x) style_pvalue(x, digits = 3)
+)
+
+as_flex_table(TableDuration_Surgeon) |>
+  flextable::set_table_properties(
+    layout = "autofit",
+    width = 0.15,
+    align = "center",
+    opts_word = list(split = TRUE)
+  )
+```
+
+```{r}
+# Post-hoc pairwise comparisons
+DurationPost_Surgeon <- avg_comparisons(
+  Duration_model_surgeon,
+  variables = list(Group1 = "pairwise"),
+  type = "response",
+  re.form = NA
+) |>
+  gt::gt() |>
+  fmt_number(decimals = 2)
+
+knitr::knit_print(DurationPost_Surgeon)
+```
+
+```{r}
+# Model-predicted marginal means by Group
+TableDurationSum_Surgeon <- avg_predictions(
+  Duration_model_surgeon,
+  by = "Group1",
+  re.form = NA,
+  conf_level = 0.95,
+  type = "response"
+) |>
+  mutate(
+    standarddev = case_when(
+      Group1 == "Pre-RAS"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Pre-RAS")))),
+      Group1 == "Non-RAS"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Non-RAS")))),
+      Group1 == "RAS"      ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "RAS"))))
+    )
+  )
+```
+
+```{r}
+# Model predicted distribution by Group
+DurationPredict_Surgeon <- marginaleffects::predictions(
+  Duration_model_surgeon,
+  re.form = NA,
+  type = "response",
+  conf_level = 0.95
+)
+
+DurationFig_Surgeon <- ggplot(
+  data = DurationPredict_Surgeon,
+  mapping = aes(y = Group1, x = ProcedureDuration)
+) +
+  stat_slab(aes(thickness = after_stat(pdf * n)), scale = 0.7) +
+  stat_dotsinterval(side = "bottom", scale = 0.7, slab_linewidth = NA) +
+  ggtitle("Model Predicted Procedure Duration by Group (Surgeon Random Effect)")
+
+knitr::knit_print(DurationFig_Surgeon)
+```
+
+```{r}
+# Extract variance components from the crossed random effects model
+vc <- lme4::VarCorr(Duration_model_surgeon)
+
+var_surgeon  <- as.numeric(vc$Surgeon)
+var_patient  <- as.numeric(vc$PatientID2)
+var_residual <- attr(vc, "sc")^2
+
+var_total <- var_surgeon + var_patient + var_residual
+
+icc_surgeon <- var_surgeon  / var_total
+icc_patient <- var_patient  / var_total
+icc_resid   <- var_residual / var_total
+
+# Variance decomposition table
+var_decomp <- data.frame(
+  Source    = c("Surgeon", "Patient (bilateral)", "Residual"),
+  Variance  = c(var_surgeon, var_patient, var_residual),
+  ICC       = c(icc_surgeon, icc_patient, icc_resid)
+)
+
+var_decomp_table <- var_decomp |>
+  gt() |>
+  tab_header(
+    title = "Variance decomposition: crossed random effects model"
+  ) |>
+  cols_label(
+    Source   = "Source",
+    Variance = "Variance",
+    ICC      = "ICC (proportion of total variance)"
+  ) |>
+  fmt_number(
+    columns = c(Variance, ICC),
+    decimals = 4
+  )
+
+knitr::knit_print(var_decomp_table)
+```
+
+```{r}
+# Variance decomposition bar chart
+var_decomp |>
+  mutate(Source = forcats::fct(Source,
+                               levels = c("Residual",
+                                          "Patient (bilateral)",
+                                          "Surgeon"))) |>
+  ggplot(aes(x = ICC, y = "Procedure Duration", fill = Source)) +
+  geom_col(width = 0.4) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1),
+                     limits = c(0, 1)) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    x    = "Proportion of total variance",
+    y    = NULL,
+    fill = "Variance source",
+    title = "Variance decomposition by random effect level"
+  ) +
+  theme_minimal()
+```
+
+```{epoxy}
+A sensitivity analysis was conducted to assess whether unaccounted surgeon-level variation influenced the primary finding for procedure duration. A crossed random effects structure was specified, adding a surgeon-level random intercept `(1|Surgeon)` to the primary patient-level random intercept `(1|PatientID2)`. With seven surgeon levels, the surgeon variance component may be presented with degraded reliability and should be interpreted with caution. This model is presented as a sensitivity check rather than a preferred specification. Variance decomposition via intraclass correlation indicated that the surgeon random effect accounted for {scales::percent(icc_surgeon, accuracy = 0.1)} of total variance in procedure duration, compared with {scales::percent(icc_patient, accuracy = 0.1)} attributable to patient-level clustering (bilateral cases) and {scales::percent(icc_resid, accuracy = 0.1)} residual variance (figure and table above). Model fit indices (table above) and pairwise group contrasts (table above) were inspected for consistency with the primary model. Concordance between the two models in the direction, magnitude, and statistical significance of Group contrasts, in combination with the surgeon ICC, informs whether surgeon-level clustering represents a material source of confounding in the primary procedure duration analysis.
 
 ```
 
