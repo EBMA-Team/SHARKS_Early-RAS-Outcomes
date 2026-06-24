@@ -4812,7 +4812,7 @@ knitr::knit_print(surgeon_comparison_table)
 ```
 
 ```{r}
-#| label: tbl-surgeon-regression
+#| label: tbl-surgeon-regression1
 #| tbl-cap: "Summary of surgeon random effect model"
 
 
@@ -4835,7 +4835,7 @@ as_flex_table(TableDuration_Surgeon) |>
 ```
 
 ```{r}
-#| label: tbl-surgeon-regression
+#| label: tbl-surgeon-regression2
 #| tbl-cap: "Post-hoc comparisons between groups with surgeon random effect model"
 
 # Post-hoc pairwise comparisons
