@@ -4837,7 +4837,7 @@ TableDurMerge <- gtsummary::tbl_merge(list(
   TableDuration_Surgeon),
   tab_spanner = c(
     "Primary model",
-    "Surgeon added model"
+    "Expanded (Surgeon)"
   )
 )
 
@@ -4849,8 +4849,8 @@ as_flex_table(TableDurMerge) |>
     opts_word = list(split = TRUE)
   )
 ```
-The crossed random effects model with Surgeon added 
 
+The crossed random effects model with Surgeon added as a random intercept shows a noticeable effect on the magnitude, direction and significance of the coefficients compared to the primary model (@tbl-surgeon-regression1). However, the expanded model relies on within-surgeon contrasts with some balance to estimate the fixed effect of Group. As shown by the counts (@tbl-casevolume), this assumption is well supported for the Pre-RAS vs RAS contrast, given that Surgeons A, B and C contributed substantively to both groups. However, within-surgeon identification for the Non-RAS contrast is comparatively weak. Surgeon D performed Non-RAS cases exclusively, while the RAS-predominant surgeons (E,F) contributed minimal Non-RAS case volume. Only Surgeon G contributed substantially to both groups, making the within-surgeon Non-RAS estimate disproportionately informed by this Surgeon's dataset, supplemented by partial pooling across the random-effects distribution for surgeon with little or no direct contrast. The Non-RAS coefficient from the expanded model should be interpreted with caution, as it reflects a combination of within-surgeon adjustment and model-based shrinkage rather than uniformly identified contrast across the surgeon cohort.
 
 ```{r}
 #| label: tbl-surgeon-regression2
@@ -4869,6 +4869,8 @@ DurationPost_Surgeon <- avg_comparisons(
 knitr::knit_print(DurationPost_Surgeon)
 
 ```
+
+The pairwise contrasts for Group also show differences to the primary model (illustrated in @tbl-duration-posthoc) for the reasons stated above.
 
 ```{r}
 # Model-predicted marginal means by Group
@@ -4909,6 +4911,10 @@ DurationFig_Surgeon <- ggplot(
 
 knitr::knit_print(DurationFig_Surgeon)
 ```
+
+The model-predicted distributions from the expanded model showed minimal differences in shape to the primary model results.
+
+The variance was decomposed and attributed to each random factor by calculating the intracluster correlation coefficient. The variance and proportional variances were calculated.
 
 ```{r}
 #| label: tbl-variance-decomp
@@ -4953,9 +4959,12 @@ var_decomp_table <- var_decomp |>
 knitr::knit_print(var_decomp_table)
 ```
 
+Surgeon as a factor in the expanded model is attributed to \<4% of the total variance within the model ( @tbl-variance-decomp).
+
 ```{r}
 #| label: fig-var-decomp
 #| fig-cap: "Variance decomposition by random effect level in sensitivity analysis"
+#| execute: false
 
 
 # Variance decomposition bar chart
@@ -4981,7 +4990,7 @@ knitr::knit_print(FigVarDecomp)
 ```
 
 ```{epoxy}
-A sensitivity analysis was conducted to assess whether unaccounted surgeon-level variation influenced the primary finding for procedure duration. A crossed random effects structure was specified, adding a surgeon-level random intercept `(1|Surgeon)` to the primary patient-level random intercept `(1|PatientID2)`. With seven surgeon levels, the surgeon variance component may be presented with degraded reliability and should be interpreted with caution. This model is presented as a sensitivity check rather than a preferred specification. Variance decomposition via intraclass correlation indicated that the surgeon random effect accounted for {scales::percent(icc_surgeon, accuracy = 0.1)} of total variance in procedure duration, compared with {scales::percent(icc_patient, accuracy = 0.1)} attributable to patient-level clustering (bilateral cases) and {scales::percent(icc_resid, accuracy = 0.1)} residual variance (figure and table above). Model fit indices (table above) and pairwise group contrasts (table above) were inspected for consistency with the primary model. Concordance between the two models in the direction, magnitude, and statistical significance of Group contrasts, in combination with the surgeon ICC, informs whether surgeon-level clustering represents a material source of confounding in the primary procedure duration analysis.
+A sensitivity analysis was conducted to assess whether unaccounted surgeon-level variation influenced the primary finding for procedure duration. A crossed random effects structure was specified, adding a surgeon-level random intercept `(1|Surgeon)` to the primary patient-level random intercept `(1|PatientID2)`. With seven surgeon levels, the surgeon variance component may be presented with degraded reliability and should be interpreted with caution. This model is presented as a sensitivity check rather than a preferred specification. Variance decomposition via intraclass correlation indicated that the surgeon random effect accounted for {scales::percent(icc_surgeon, accuracy = 0.1)} of total variance in procedure duration, compared with {scales::percent(icc_patient, accuracy = 0.1)} attributable to patient-level clustering (bilateral cases) and {scales::percent(icc_resid, accuracy = 0.1)} residual variance (figure and table above). Model fit indices (@tbl-surgeon-regression1) and pairwise group contrasts ( @tbl-variance-decomp ) were inspected for consistency with the primary model. Concordance between the two models in the direction, magnitude, and statistical significance of Group contrasts, in combination with the surgeon ICC, informs whether surgeon-level clustering represents a material source of confounding in the primary procedure duration analysis.
 
 ```
 
@@ -5070,6 +5079,8 @@ Readmit_Surgeon_Group_Events |>
   knitr::knit_print()
 ```
 
+Cross tabulation of the readmission events ( @tbl-surggrp-crosstab) revealed non-overlapping surgeons associated with the majority of readmission events within the cohort. Therefore the frailty variance estimator may become less stable, leading to shiftis in the direction and magnitude of hazard ratio.
+
 ```{r}
 
 
@@ -5111,11 +5122,12 @@ if (length(Readmit_Frailty_Warnings) > 0) {
   epoxy::epoxy("Model fitting produced no warnings.")
 }
 
+
 ```
 
 ```{r}
 #| label: tbl-frailty-summary
-#| tbl-cap: "Summary of survival model including a frailty variance estimate for surgeon"
+#| tbl-cap: "Summary of all-cause readmission model including a frailty variance estimate for surgeon"
 
 ModelCox4_Frailty_Table <- tibble::tribble(
   ~Term,                          ~coef,    ~`se(coef)`, ~se2,    ~Chisq,  ~DF,  ~p,
@@ -5131,7 +5143,6 @@ ModelCox4_Frailty_Table <- tibble::tribble(
 
 ModelCox4_Frailty_Table |>
   gt::gt() |>
-  gt::tab_header(title = "Surgeon Shared Frailty Model: All-Cause Readmission") |>
   gt::cols_label(
     coef = "Coef", `se(coef)` = "SE(coef)", se2 = "SE2",
     Chisq = "\u03c7\u00b2", DF = "df", p = "p-value"
