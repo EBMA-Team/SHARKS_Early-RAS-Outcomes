@@ -4759,9 +4759,11 @@ Based on reviewer feedback 24-Jun-2026, sensitivity analyses were conducted on p
 
 The primary procedure duration model, which accounted for non-independence between bilateral cases via a patient-level random intercept, did not separately account for surgeon-level variation. Surgeon-level clustering in outcomes studies of orthopaedic surgery is chronically under-reported in the literature [@oltean2015] and is usually ignored in the studies such as the one described here. Nevertheless, it is a recognised source of unmeasured confounding in surgical outcomes research [@cook2012]. Intracluster correlation coefficients (ICCs) indicate that outcomes such as procedure duration can vary between surgeons independent of treatment allocation
 
-To assess whether Surgeon influenced the present results, a sensitivity analysis was performed by extending the primary model of procedure duration with an additional surgeon-level random intercept. A random intercept is the appropriate design choice as it enables an assessment of surgeon-level confounding within the model without sacrificing degrees of freedom. The fixed effects for 7 surgeons would consume the cases-per-surgeon imbalance within the model and lead to difficulties with convergence and inflating uncertainty within the estimates. \
+To assess whether Surgeon influenced the present results, a sensitivity analysis was performed by extending the primary model of procedure duration with an additional surgeon-level random intercept. A random intercept is the appropriate design choice as it enables an assessment of surgeon-level confounding within the model without sacrificing degrees of freedom. The fixed effects for 7 surgeons would consume the cases-per-surgeon imbalance within the model and lead to difficulties with convergence and inflating uncertainty within the estimates.\
 \
 Surgeon as a random effect was specified as crossed rather than nested with the existing patient-level term, since individual surgeons' caseloads span multiple groups rather than being hierarchically subsumed within them [@baayen2008] . The relative contribution of surgeon-level variation was quantified using the ICC, defined as the proportion of total outcome variance attributable to a given grouping factor [@shrout1979], allowing direct comparison of surgeon-, patient-, and residual-level contributions to variance in procedure duration. Given the small number of surgeon levels (n = 7) contributing to this cohort, variance component estimates at the surgeon level are subject to reduced precision [@maas2005], therefore this model is presented as a sensitivity check rather than a replacement.
+
+Surgeon was added to the analysis subset for procedure duration.
 
 ```{r}
 # Add Surgeon to the Duration_Analysis subset
@@ -4777,6 +4779,8 @@ Duration_Analysis_Surgeon <- MasterSheet6 |> dplyr::select(
                                    levels = c("Unilateral", "Bilateral"))
   )
 ```
+
+Surgeon was added as a crossed random effect to the existing model and fit using the bobyqa optimiser \[citation\] implemented in `lme4`, after the default optimiser failed to converge, with the maximum number of function evaluations increased to 200 000 to enable convergence.
 
 ```{r}
 # Fit crossed random effects model with Surgeon and PatientID2
@@ -4812,9 +4816,11 @@ surgeon_comparison_table <- surgeon_comparison |>
 knitr::knit_print(surgeon_comparison_table)
 ```
 
+The comparison between models for AIC and BIC revealed a marginal improvement in fits when Surgeon was added as an additional factor ( @tbl-surgeon-comparison )
+
 ```{r}
 #| label: tbl-surgeon-regression1
-#| tbl-cap: "Summary of surgeon random effect model"
+#| tbl-cap: "Summary of surgeon random effect model: Primary model vs expanded sensitivity model"
 
 
 # Regression table for surgeon random effect model
@@ -4826,7 +4832,16 @@ TableDuration_Surgeon <- tbl_regression(
   pvalue_fun = function(x) style_pvalue(x, digits = 3)
 )
 
-as_flex_table(TableDuration_Surgeon) |>
+TableDurMerge <- gtsummary::tbl_merge(list(
+  TableDuration,
+  TableDuration_Surgeon),
+  tab_spanner = c(
+    "Primary model",
+    "Surgeon added model"
+  )
+)
+
+as_flex_table(TableDurMerge) |>
   flextable::set_table_properties(
     layout = "autofit",
     width = 0.15,
@@ -4834,6 +4849,8 @@ as_flex_table(TableDuration_Surgeon) |>
     opts_word = list(split = TRUE)
   )
 ```
+The crossed random effects model with Surgeon added 
+
 
 ```{r}
 #| label: tbl-surgeon-regression2
@@ -4850,6 +4867,7 @@ DurationPost_Surgeon <- avg_comparisons(
   fmt_number(decimals = 2)
 
 knitr::knit_print(DurationPost_Surgeon)
+
 ```
 
 ```{r}
