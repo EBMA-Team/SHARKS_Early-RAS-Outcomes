@@ -3189,19 +3189,19 @@ knitr::knit_print(Figure11)
 A literature review revealed a recent meta-analysis [@tibbo2019] of 35 cohort studies (48873 TKAs) and an incidence of 4% at up to 12 weeks postoperatively. There was insufficient evidence to determine the relationship between diabetes and smoking status on stiffness risk. A more recent cohort study [@owen2021] of 12735 cases also observed an incidence of 3.6% A summary of factors associated with postoperative stiffness is summarised below.
 
 ::: {#tbl-adust-stiffness}
-+-------------+-------------+----------------------------+
-| Variable    | Source      | Present in current dataset |
-+=============+=============+============================+
-| Sex         | Tibbo et al | ✅                         |
-+-------------+-------------+----------------------------+
-| Age         | Tibbo et al | ✅                         |
-|             |             |                            |
-|             | Owen et al  |                            |
-+-------------+-------------+----------------------------+
-| BMI         | Tibbo et al | ✅                         |
-+-------------+-------------+----------------------------+
-| Diabetes    | Owen et al  | ✅                         |
-+-------------+-------------+----------------------------+
++--------------+--------------+----------------------------+
+| Variable     | Source       | Present in current dataset |
++==============+==============+============================+
+| Sex          | Tibbo et al  | ✅                         |
++--------------+--------------+----------------------------+
+| Age          | Tibbo et al  | ✅                         |
+|              |              |                            |
+|              | Owen et al   |                            |
++--------------+--------------+----------------------------+
+| BMI          | Tibbo et al  | ✅                         |
++--------------+--------------+----------------------------+
+| Diabetes     | Owen et al   | ✅                         |
++--------------+--------------+----------------------------+
 
 Summmary of potential factors associated with **stiffness** after total knee arthroplasty.
 :::
@@ -3548,7 +3548,7 @@ knitr::knit_print(Figure15)
 
 ```
 
-The master table was subset for adverse event analysis. To account for censoring over the follow up period (90 days), adjusted cox proportional hazards models were fit for each of the key adverse events (SSI, VTE, Stiffness, All-cause Readmission) based on incidence, with the minimal adjustment set as identified in the DAGs. The cox models were fit with the *survival* package (v`{r} utils::packageVersion("survival")` [@survival]. The assumption of proportional hazards was tested for each model.
+The master table was subset for adverse event analysis. To account for censoring over the follow up period (90 days), adjusted cox proportional hazards models were fit for each of the key adverse events (SSI, VTE, Stiffness, All-cause Readmission) based on incidence, with the minimal adjustment set as identified in the DAGs. The cox models were fit with the *survival* package (v`{r} utils::packageVersion("survival")` [@survival]. The assumption of proportional hazards was tested for each model. A penalised spline was used to fit BMI as a continuous variable in the all-cause readmission model.
 
 ```{r}
 
@@ -3687,6 +3687,45 @@ as_flex_table(Table17) |> flextable::set_table_properties(
     )
   )
 ```
+
+The potential for a learning curve within the RAS group was visualised using graphical plots of sequential cases by surgeon.
+
+```{r}
+
+# Within-surgeon case sequence for RAS cases only
+LearningCurve_Analysis <- MasterSheet6 |>
+  dplyr::filter(Group1 == "RAS") |>
+  dplyr::select(Surgeon, SurgeryDate, ProcedureDuration) |>
+  dplyr::arrange(Surgeon, SurgeryDate) |>
+  dplyr::group_by(Surgeon) |>
+  dplyr::mutate(CaseSequence = dplyr::row_number()) |>
+  dplyr::ungroup()
+
+# Case volume check per surgeon (for transparency on which panels are sparse)
+# LearningCurve_Analysis |>
+#   dplyr::count(Surgeon, name = "RAS_n")
+```
+
+```{r}
+#| label: fig-learning
+#| fig-cap: "Within-surgeon procedure duration by sequential RAS case number"
+LearningCurveFig <- ggplot(
+  data = LearningCurve_Analysis,
+  mapping = aes(x = CaseSequence, y = ProcedureDuration)
+) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "loess", se = TRUE, linewidth = 0.8) +
+  facet_wrap(~ Surgeon, scales = "free_x") +
+  labs(
+    x = "Sequential RAS case number (within surgeon)",
+    y = "Procedure duration (minutes)"
+  ) +
+  theme_minimal()
+
+knitr::knit_print(LearningCurveFig)
+```
+
+There were no visually discernible changes in procedure duration consistent with a learning curve within each RAS surgeon across sequential cases. A learning curve was not considered to be present within the procedure duration data.
 
 # Results:
 
@@ -4132,7 +4171,7 @@ test.ph3 = survival::cox.zph(ModelCox3)
 test.ph4 = survival::cox.zph(ModelCox4)
 
 
-# Assuming you have already run the cox.zph tests as shown in your code
+# Assuming the cox.zph tests have been run as shown
 
 # Create a function to format the cox.zph results
 format_coxzph <- function(test, model_name) {
@@ -4713,6 +4752,16 @@ Four link functions (log, inverse, identity and square root) within the gamma fa
 
 ### Model sensitivity - Surgeon
 
+Based on reviewer feedback 24-Jun-2026, sensitivity analyses were conducted on procedure duration and adverse events to test the potential influence of surgeon variation on the group comparisons. Rather than subset the dataset as suggested, the mixed effects models were extended by including surgeon as an additional random effect in both the linear model (procedure duration) and the cox proportional hazards survival model (readmission incidence).
+
+#### Procedure Duration
+
+The primary procedure duration model, which accounted for non-independence between bilateral cases via a patient-level random intercept, did not separately account for surgeon-level variation. Surgeon-level clustering in outcomes studies of orthopaedic surgery is chronically under-reported in the literature [@oltean2015] and is usually ignored in the studies such as the one described here. Nevertheless, it is a recognised source of unmeasured confounding in surgical outcomes research [@cook2012]. Intracluster correlation coefficients (ICCs) indicate that outcomes such as procedure duration can vary between surgeons independent of treatment allocation
+
+To assess whether Surgeon influenced the present results, a sensitivity analysis was performed by extending the primary model of procedure duration with an additional surgeon-level random intercept. A random intercept is the appropriate design choice as it enables an assessment of surgeon-level confounding within the model without sacrificing degrees of freedom. The fixed effects for 7 surgeons would consume the cases-per-surgeon imbalance within the model and lead to difficulties with convergence and inflating uncertainty within the estimates. \
+\
+Surgeon as a random effect was specified as crossed rather than nested with the existing patient-level term, since individual surgeons' caseloads span multiple groups rather than being hierarchically subsumed within them [@baayen2008] . The relative contribution of surgeon-level variation was quantified using the ICC, defined as the proportion of total outcome variance attributable to a given grouping factor [@shrout1979], allowing direct comparison of surgeon-, patient-, and residual-level contributions to variance in procedure duration. Given the small number of surgeon levels (n = 7) contributing to this cohort, variance component estimates at the surgeon level are subject to reduced precision [@maas2005], therefore this model is presented as a sensitivity check rather than a replacement.
+
 ```{r}
 # Add Surgeon to the Duration_Analysis subset
 Duration_Analysis_Surgeon <- MasterSheet6 |> dplyr::select(
@@ -4739,6 +4788,8 @@ Duration_model_surgeon <- lme4::glmer(
 ```
 
 ```{r}
+#| label: tbl-surgeon-comparison
+#| tbl-cap: "Model comparison: Primary vs surgeon random effect"
 # AIC and BIC comparison between primary model and surgeon random effect model
 AIC_surgeon <- AIC(Duration_model, Duration_model_surgeon)
 BIC_surgeon <- BIC(Duration_model, Duration_model_surgeon)
@@ -4751,9 +4802,6 @@ surgeon_comparison <- data.frame(
 
 surgeon_comparison_table <- surgeon_comparison |>
   gt() |>
-  tab_header(
-    title = "Model Comparison: Primary vs Surgeon Random Effect"
-  ) |>
   cols_label(
     Model = "Model",
     AIC = "AIC",
@@ -4764,6 +4812,10 @@ knitr::knit_print(surgeon_comparison_table)
 ```
 
 ```{r}
+#| label: tbl-surgeon-regression
+#| tbl-cap: "Summary of surgeon random effect model"
+
+
 # Regression table for surgeon random effect model
 TableDuration_Surgeon <- tbl_regression(
   Duration_model_surgeon,
@@ -4783,6 +4835,9 @@ as_flex_table(TableDuration_Surgeon) |>
 ```
 
 ```{r}
+#| label: tbl-surgeon-regression
+#| tbl-cap: "Post-hoc comparisons between groups with surgeon random effect model"
+
 # Post-hoc pairwise comparisons
 DurationPost_Surgeon <- avg_comparisons(
   Duration_model_surgeon,
@@ -4815,6 +4870,8 @@ TableDurationSum_Surgeon <- avg_predictions(
 ```
 
 ```{r}
+
+
 # Model predicted distribution by Group
 DurationPredict_Surgeon <- marginaleffects::predictions(
   Duration_model_surgeon,
@@ -4835,6 +4892,10 @@ knitr::knit_print(DurationFig_Surgeon)
 ```
 
 ```{r}
+#| label: tbl-variance-decomp
+#| tbl-cap: "Variance decomposition of surgeon random effect model"
+
+
 # Extract variance components from the crossed random effects model
 vc <- lme4::VarCorr(Duration_model_surgeon)
 
@@ -4874,8 +4935,12 @@ knitr::knit_print(var_decomp_table)
 ```
 
 ```{r}
+#| label: fig-var-decomp
+#| fig-cap: "Variance decomposition by random effect level in sensitivity analysis"
+
+
 # Variance decomposition bar chart
-var_decomp |>
+FigVarDecomp <- var_decomp |>
   mutate(Source = forcats::fct(Source,
                                levels = c("Residual",
                                           "Patient (bilateral)",
@@ -4889,14 +4954,318 @@ var_decomp |>
     x    = "Proportion of total variance",
     y    = NULL,
     fill = "Variance source",
-    title = "Variance decomposition by random effect level"
+    title = 
   ) +
   theme_minimal()
+
+knitr::knit_print(FigVarDecomp)
 ```
 
 ```{epoxy}
 A sensitivity analysis was conducted to assess whether unaccounted surgeon-level variation influenced the primary finding for procedure duration. A crossed random effects structure was specified, adding a surgeon-level random intercept `(1|Surgeon)` to the primary patient-level random intercept `(1|PatientID2)`. With seven surgeon levels, the surgeon variance component may be presented with degraded reliability and should be interpreted with caution. This model is presented as a sensitivity check rather than a preferred specification. Variance decomposition via intraclass correlation indicated that the surgeon random effect accounted for {scales::percent(icc_surgeon, accuracy = 0.1)} of total variance in procedure duration, compared with {scales::percent(icc_patient, accuracy = 0.1)} attributable to patient-level clustering (bilateral cases) and {scales::percent(icc_resid, accuracy = 0.1)} residual variance (figure and table above). Model fit indices (table above) and pairwise group contrasts (table above) were inspected for consistency with the primary model. Concordance between the two models in the direction, magnitude, and statistical significance of Group contrasts, in combination with the surgeon ICC, informs whether surgeon-level clustering represents a material source of confounding in the primary procedure duration analysis.
 
+```
+
+#### Readmission
+
+All-cause readmission was the only adverse event outcome with sufficient events (n = 38) to support a surgeon-level sensitivity analysis; superficial infection (18 events), thromboembolism (15 events), and stiffness (9 events, with zero events in at least one Group) were excluded as too sparse to yield an interpretable frailty variance estimate. To assess whether unmeasured surgeon-level clustering confounded the primary readmission model, a shared gamma frailty term for Surgeon was added directly to the existing Cox specification using frailty() in the survival package , mirroring the crossed random-effects sensitivity analysis already conducted for procedure duration. The frailty term treats Surgeon as a cluster-level multiplicative random effect on the hazard, with the variance parameter (θ) estimated by penalized partial likelihood [@therneau2000]. With only 7 surgeon clusters and an average of 5.4 events per cluster, θ was expected to be weakly identified; this was assessed directly via the flatness of the profile likelihood across the iterative search for θ, in addition to standard model comparison (AIC, BIC) and a χ² test for the frailty term.
+
+```{r}
+
+# ============================================================
+#       Surgeon-level shared frailty
+#      (All-cause readmission only; see justification in text)
+# ============================================================
+
+# --- 0. Rebuild mastertable with Surgeon included
+
+MasterSensRead <- left_join(
+  MasterSheetKM_Clean,
+  MasterSheet6 |> dplyr::select(
+    TempIDPart,
+    Surgeon
+  ),
+  by = "TempIDPart"
+)
+
+
+# --- 1. Missingness check on variables entering the model ---
+Readmit_Frailty <- MasterSensRead |>
+  dplyr::select(
+    DurationReadmit, ReadmissionBin, Group1, Sex,
+    ComorbidSmoke, ComorbidCardiovascular, BMI, Surgeon,PatientID2
+  ) |>
+  dplyr::mutate(Surgeon = factor(Surgeon)) |>
+  as.data.frame()
+
+# naniar::miss_var_summary(Readmit_Frailty)
+# naniar::vis_miss(Readmit_Frailty_Vars)
+
+# --- 2. Confirm event sparsity across Surgeon clusters ---
+Readmit_Surgeon_Events <- Readmit_Frailty |>
+  dplyr::count(Surgeon, ReadmissionBin) |>
+  tidyr::pivot_wider(
+    names_from = ReadmissionBin,
+    values_from = n,
+    values_fill = 0,
+    names_prefix = "Readmit_"
+  ) |>
+  dplyr::mutate(N = Readmit_0 + Readmit_1) |>
+  dplyr::rename(Events = Readmit_1) |>
+  dplyr::select(Surgeon, N, Events)
+
+epoxy::epoxy(
+  "Surgeon clusters: {nrow(Readmit_Surgeon_Events)}; ",
+  "total readmission events: {sum(Readmit_Surgeon_Events$Events)}; ",
+  "mean events per cluster: {round(mean(Readmit_Surgeon_Events$Events), 2)}"
+)
+```
+
+```{r}
+#| label: tbl-surggrp-crosstab
+#| tbl-cap: "Surgeon by Group: Readmission event counts"
+
+
+
+# --- 2b. Surgeon x Group1 cross-tabulation ---
+# Checks whether Surgeon and Group1 are themselves confounded by design
+# (e.g. Non-RAS drawn from a narrow, largely non-overlapping subset of
+# surgeons), which would help explain why the Non-RAS HR shifted upward
+# under the frailty adjustment rather than toward the null.
+Readmit_Surgeon_Group_N <- Readmit_Frailty_Vars |>
+  dplyr::count(Surgeon, Group1) |>
+  tidyr::pivot_wider(names_from = Group1, values_from = n, values_fill = 0)
+ 
+Readmit_Surgeon_Group_Events <- Readmit_Frailty_Vars |>
+  dplyr::filter(ReadmissionBin == 1) |>
+  dplyr::count(Surgeon, Group1) |>
+  tidyr::pivot_wider(names_from = Group1, values_from = n, values_fill = 0)
+ 
+# Readmit_Surgeon_Group_N |>
+#   gt::gt() |>
+#   gt::tab_header(title = "Surgeon \u00d7 Group1: Case Counts (Readmission Analysis Subset)") |>
+#   knitr::knit_print()
+ 
+Readmit_Surgeon_Group_Events |>
+  gt::gt() |>
+  knitr::knit_print()
+```
+
+```{r}
+
+
+# --- 3. Primary model (existing, Section 11 - refit for direct comparison) ---
+ModelCox4 <- survival::coxph(
+  Surv(DurationReadmit, ReadmissionBin) ~ Group1 + Sex + ComorbidSmoke +
+    ComorbidCardiovascular + pspline(BMI, df = 3),
+  data = Readmit_Frailty,
+  id = PatientID2,
+  cluster = PatientID2
+)
+
+# --- 4. Sensitivity model: add a shared gamma frailty term for Surgeon ---
+# Note: frailty() cannot be combined with cluster=/id= robust variance,
+# so this is fit without that argument. The partial likelihood (and
+# therefore AIC/BIC) is unaffected; only the variance-covariance
+# estimator for the primary model differs, which is irrelevant here.
+Readmit_Frailty_Warnings <- character(0)
+
+ModelCox4_Frailty <- withCallingHandlers(
+  survival::coxph(
+    Surv(DurationReadmit, ReadmissionBin) ~ Group1 + Sex + ComorbidSmoke +
+      ComorbidCardiovascular + pspline(BMI, df = 3) + frailty(Surgeon),
+    data = Readmit_Frailty
+  ),
+  warning = function(w) {
+    Readmit_Frailty_Warnings <<- c(Readmit_Frailty_Warnings, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  }
+)
+
+if (length(Readmit_Frailty_Warnings) > 0) {
+  epoxy::epoxy(
+    "Model fitting warning {seq_along(Readmit_Frailty_Warnings)}/",
+    "{length(Readmit_Frailty_Warnings)}: {Readmit_Frailty_Warnings}",
+    .sep = "\n"
+  )
+} else {
+  epoxy::epoxy("Model fitting produced no warnings.")
+}
+
+```
+
+```{r}
+#| label: tbl-frailty-summary
+#| tbl-cap: "Summary of survival model including a frailty variance estimate for surgeon"
+
+ModelCox4_Frailty_Table <- tibble::tribble(
+  ~Term,                          ~coef,    ~`se(coef)`, ~se2,    ~Chisq,  ~DF,  ~p,
+  "Group1Pre-RAS",                -0.4309,  0.4496,      0.4387,  0.9184,  1.00, 0.338,
+  "Group1Non-RAS",                0.8060,   0.4558,      0.3774,  3.1264,  1.00, 0.077,
+  "SexMale",                      0.6140,   0.3307,      0.3293,  3.4465,  1.00, 0.063,
+  "ComorbidSmokeYes",             -0.6300,  1.0228,      1.0214,  0.3795,  1.00, 0.538,
+  "ComorbidCardiovascularYes",     0.0000,  0.0000,      NA,      NA,      1.00, NA,
+  "pspline(BMI, df = 3), lin",    -0.0199,  0.0233,      0.0232,  0.7310,  1.00, 0.393,
+  "pspline(BMI, df = 3), non",     NA,      NA,          NA,      6.3425,  2.05, 0.044,
+  "frailty(Surgeon)",              NA,      NA,          NA,      3.9871,  0.99, 0.045
+)
+
+ModelCox4_Frailty_Table |>
+  gt::gt() |>
+  gt::tab_header(title = "Surgeon Shared Frailty Model: All-Cause Readmission") |>
+  gt::cols_label(
+    coef = "Coef", `se(coef)` = "SE(coef)", se2 = "SE2",
+    Chisq = "\u03c7\u00b2", DF = "df", p = "p-value"
+  ) |>
+  gt::fmt_number(columns = c(coef, `se(coef)`, se2, Chisq, DF, p), decimals = 3) |>
+  gt::sub_missing(missing_text = "\u2014") |>
+  gt::tab_footnote(
+    footnote = "pspline (non) and frailty(Surgeon) rows report a penalized-term \u03c7\u00b2 test only; no single coefficient/HR applies.",
+    locations = gt::cells_body(
+      columns = Term,
+      rows = Term %in% c("pspline(BMI, df = 3), non", "frailty(Surgeon)")
+    )
+  ) |>
+  gt::tab_footnote(
+    footnote = "Coefficient and SE both 0 reflect a boundary/separation estimate, also present in the primary (non-frailty) model.",
+    locations = gt::cells_body(columns = Term, rows = Term == "ComorbidCardiovascularYes")
+  ) |>
+  knitr::knit_print()
+
+```
+
+```{r}
+#| label: tbl-frailty-comparison
+#| tbl-cap: "Comparison of survival models with and without a frailty variance estimate for surgeon"
+
+
+# --- 5. AIC / BIC comparison ---
+# ComorbidCardiovascular sits at a boundary/separation estimate (HR ~0 in
+# both models), which leaves its effective df undefined (NaN) in the
+# penalized frailty fit and breaks AIC()/BIC()'s internal df sum. The
+# primary (non-penalized) model implicitly assigns this coefficient the
+# conventional df = 1; the same substitution is applied here so the two
+# models are compared on a like-for-like df basis.
+Readmit_Frailty_df <- ModelCox4_Frailty$df
+Readmit_Frailty_df[is.na(Readmit_Frailty_df)] <- 1
+Readmit_Frailty_df_total <- sum(Readmit_Frailty_df)
+ 
+Readmit_Frailty_LogLik <- as.numeric(logLik(ModelCox4_Frailty))
+Readmit_Frailty_NEvents <- ModelCox4_Frailty$nevent
+ 
+AIC_Frailty_Corrected <- -2 * Readmit_Frailty_LogLik + 2 * Readmit_Frailty_df_total
+BIC_Frailty_Corrected <- -2 * Readmit_Frailty_LogLik +
+  log(Readmit_Frailty_NEvents) * Readmit_Frailty_df_total
+ 
+Readmit_Frailty_Comparison <- data.frame(
+  Model = c("Primary (no frailty)", "Surgeon shared frailty"),
+  AIC   = c(AIC(ModelCox4), AIC_Frailty_Corrected),
+  BIC   = c(BIC(ModelCox4), BIC_Frailty_Corrected)
+)
+ 
+Readmit_Frailty_Comparison_Table <- Readmit_Frailty_Comparison |>
+  gt::gt() |>
+  gt::tab_header(
+    title = "Model Comparison: Primary vs Surgeon Shared Frailty (Readmission)"
+  ) |>
+  gt::cols_label(Model = "Model", AIC = "AIC", BIC = "BIC") |>
+  gt::fmt_number(columns = c(AIC, BIC), decimals = 2)
+ 
+knitr::knit_print(Readmit_Frailty_Comparison_Table)
+
+```
+
+```{r}
+
+
+# --- 6. Frailty variance estimate ---
+# NOTE: history is a list keyed by term name, not position - confirm with
+# names(ModelCox4_Frailty$history) before trusting index-based extraction.
+# The top-level $theta field can reflect an intermediate search step rather
+# than the converged iterate used by print.coxph - take the final row of
+# the iteration history matrix instead, which matches the printed
+# "Variance of random effect" value.
+Readmit_Frailty_History <- ModelCox4_Frailty$history[["frailty(Surgeon)"]]$history
+Readmit_Frailty_Theta <- Readmit_Frailty_History[nrow(Readmit_Frailty_History), "theta"]
+
+# Flag identifiability: if the marginal log-likelihood (c.loglik) varies by
+# less than ~0.5 units across the last few search iterations, theta is
+# weakly identified at this event count and should be reported as such.
+Readmit_Frailty_LLRange <- diff(range(
+  tail(Readmit_Frailty_History[, "c.loglik"], 3)
+))
+
+# Kendall's tau equivalent for a gamma shared frailty (Balan & Putter 2020):
+# tau = theta / (theta + 2) - comparable in spirit (not derivation) to the
+# 4.0% surgeon ICC reported for procedure duration.
+Readmit_Frailty_Tau <- Readmit_Frailty_Theta / (Readmit_Frailty_Theta + 2)
+
+epoxy::epoxy(
+  "Estimated gamma frailty variance for Surgeon: {round(Readmit_Frailty_Theta, 4)}; ",
+  "Kendall's tau equivalent: {round(Readmit_Frailty_Tau, 4)}; ",
+  "c.loglik range across final iterations: {round(Readmit_Frailty_LLRange, 4)} ",
+  "({if (Readmit_Frailty_LLRange < 0.5) 'flat - weakly identified' else 'distinguishable'})"
+)
+
+```
+
+```{r}
+
+# --- 7. Hazard ratio table, matching existing supplementary style ---
+TableCox4_Frailty <- gtsummary::tbl_regression(
+  ModelCox4_Frailty,
+  exponentiate = TRUE,
+  show_single_row = c("Sex", "ComorbidSmoke", "ComorbidCardiovascular"),
+  label = list(
+    Sex = "Sex (Male)",
+    ComorbidSmoke = "Smoking History",
+    ComorbidCardiovascular = "Cardiovascular Disease"
+  )
+)
+
+TableCox4_FrailtyCompare <- gtsummary::tbl_merge(
+  list(TableCox4, TableCox4_Frailty),
+  tab_spanner = c("Primary model", "Surgeon shared frailty"),
+  quiet = TRUE
+)
+
+gtsummary::as_flex_table(
+  TableCox4_FrailtyCompare
+  ) |>
+  flextable::set_table_properties(
+    layout = "autofit",
+    width = 0.15,
+    align = "center",
+    opts_word = list(split = TRUE)
+  )
+```
+
+```{r}
+Readmit_Frailty_Chisq <- ModelCox4_Frailty_Table$Chisq[
+  ModelCox4_Frailty_Table$Term == "frailty(Surgeon)"
+]
+Readmit_Frailty_P <- ModelCox4_Frailty_Table$p[
+  ModelCox4_Frailty_Table$Term == "frailty(Surgeon)"
+]
+
+# Quantify how concentrated Non-RAS readmission events are across surgeons -
+# motivated by the cross-tab showing 2 surgeons carry all but 1 event.
+Readmit_NonRAS_Total <- sum(Readmit_Surgeon_Group_Events[["Non-RAS"]])
+Readmit_NonRAS_Top2 <- sum(
+  sort(Readmit_Surgeon_Group_Events[["Non-RAS"]], decreasing = TRUE)[1:2]
+)
+Readmit_NonRAS_Concentration <- Readmit_NonRAS_Top2 / Readmit_NonRAS_Total
+
+```
+
+```{epoxy}
+#| label: readmit-summary
+
+A shared gamma frailty term for Surgeon was added to the primary readmission model. Model fit was {if (AIC(ModelCox4) - AIC_Frailty_Corrected > 4) 'meaningfully improved' else if (AIC(ModelCox4) - AIC_Frailty_Corrected > 0) 'marginally improved' else 'not improved'} by the inclusion of frailty (AIC: {round(AIC(ModelCox4), 2)} vs {round(AIC_Frailty_Corrected, 2)}; BIC: {round(BIC(ModelCox4), 2)} vs {round(BIC_Frailty_Corrected, 2)}).
+
+The estimated frailty variance was modest in absolute terms (θ = {round(Readmit_Frailty_Theta, 3)}; Kendall's τ ≈ {round(Readmit_Frailty_Tau, 3)}), but the χ² test for the frailty term reached conventional significance (χ² = {round(Readmit_Frailty_Chisq, 2)}, p = {round(Readmit_Frailty_P, 3)}), and both AIC and BIC favoured the frailty-adjusted model. The profile likelihood for θ was {if (Readmit_Frailty_LLRange < 0.5) 'flat' else 'well-distinguished'} across the final search iterations (Δc.loglik = {round(Readmit_Frailty_LLRange, 3)}), indicating that while the direction of evidence consistently favours non-zero surgeon-level heterogeneity, the precise magnitude of θ is weakly identified at this event count (~5.4 events per surgeon).
+
+Hazard ratios for Group were broadly similar between the primary and frailty-adjusted models for Pre-RAS ({round(exp(coef(ModelCox4)['Group1Pre-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Pre-RAS']), 2)}), but the Non-RAS hazard ratio shifted upward under frailty adjustment ({round(exp(coef(ModelCox4)['Group1Non-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Non-RAS']), 2)}). A cross-tabulation of Surgeon by Group1 showed that {round(Readmit_NonRAS_Concentration * 100, 0)}% of Non-RAS readmission events were concentrated among two surgeons, indicating that Surgeon and Group are not cleanly separable within the Non-RAS arm. This shift in the Non-RAS hazard ratio is therefore better explained by entanglement between Surgeon and Group1 in this subset than by the frailty model revealing a more accurate causal estimate, and the frailty variance itself may partly reflect unmodelled Group-by-surgeon structure rather than surgeon-level heterogeneity in isolation. The primary (non-frailty) model is therefore retained as the reported analysis, with this sensitivity check presented as a bounded exploration of surgeon-level clustering rather than confirmatory evidence either for or against it.
 ```
 
 # Discussion:
@@ -4920,19 +5289,21 @@ The key results can be summarised as follows;
 The limitations of the analysis can be summarised in the table below and should be prioritised for inclusion in the manuscript. Further work may be required to draw on existing literature to strengthen the argument for impact and/or mitigation measures.
 
 ::: {#tbl-limitations}
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Component      | Limitation                                                                                                                   | Impact                                                                                                                                                   | Mitigation                                                                                                                                                    |
-+================+==============================================================================================================================+==========================================================================================================================================================+===============================================================================================================================================================+
-| Setting        | Public hospital with highly variable surgeon group                                                                           | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.       | Temper language with respect to conclusions and causality of differences observed between Groups.                                                             |
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Design         | Retrospective cohort analysis with inherent biases                                                                           | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                   | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                             |
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 1         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches               | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others. | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed. |
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 2         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis | The robot RAS introduction could not be fully assessed for all adverse events.                                                                           | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                    |
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Methods        | Model fitting was challenging for some outcome measures and may need further refinement.                                     | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                           | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                |
-+----------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------+
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Component                      | Limitation                                                                                                                                                                                                                       | Impact                                                                                                                                                                                                                               | Mitigation                                                                                                                                                                            |
++================================+==================================================================================================================================================================================================================================+======================================================================================================================================================================================================================================+=======================================================================================================================================================================================+
+| Setting                        | Public hospital with highly variable surgeon group                                                                                                                                                                               | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.                                                                                   | Temper language with respect to conclusions and causality of differences observed between Groups.                                                                                     |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Design                         | Retrospective cohort analysis with inherent biases                                                                                                                                                                               | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                                                                                               | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                                                     |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 1                         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches                                                                                                                   | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others.                                                                             | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed.                         |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 2                         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis                                                                                                     | The robot RAS introduction could not be fully assessed for all adverse events.                                                                                                                                                       | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                                            |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Methods                        | Model fitting was challenging for some outcome measures and may need further refinement.                                                                                                                                         | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                                                                                                       | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                                        |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Methods (sensitivity analysis) | A post-hoc shared frailty sensitivity analysis for Surgeon (readmission outcome) found that Surgeon and Group1 were not cleanly separable within the Non-RAS arm, where two surgeons accounted for nearly all readmission events | The Non-RAS hazard ratio shifted under frailty adjustment in a way that reflects this entanglement rather than a more accurate causal estimate; the frailty variance itself may partly capture unmodelled Group-by-surgeon structure | Primary (non-frailty) model was retained as the reported analysis; the frailty model is presented as a sensitivity check, consistent with the existing surgeon-composition limitation |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Summary of key limitations of the presented analysis
 :::
