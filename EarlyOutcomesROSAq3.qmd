@@ -17,6 +17,7 @@ format:
     df-print: paged
     code-fold: true
     toc: true
+    toc-depth: 3
 editor: visual
 execute: 
   echo: true
@@ -50,7 +51,7 @@ A suggested title is the following;
 
 Abstract and full manuscript needs to be checked for spelling errors and first use of abbreviations.
 
-# Introduction:
+# Introduction
 
 <!--# Critically assess the justification for conducting the observational study. -->
 
@@ -393,7 +394,7 @@ process_gdrive_hospital_files <- function(folder_id) {
 }
 ```
 
-# STROBE \[8\] Data Sources/Measurement:
+## STROBE \[8\] Data Sources/Measurement:
 
 Prior to data collection, a [data dictionary](https://docs.google.com/spreadsheets/d/1Nk4i8g65C-i7-24KJdBoMn7QwGrkoYA88l5V45b47Wk/edit?usp=sharing "Project data dictionary") was compiled and agreed by the co-authors to establish the key variables for the dataset.
 
@@ -2168,8 +2169,8 @@ Retrospective cohort analyses are subject to a number of biases as noted by (cit
 +-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |                   |                                                                                                 |                           |                                                                                                                                                                  |
 +===================+=================================================================================================+===========================+==================================================================================================================================================================+
-| # Bias            | # Definition                                                                                    | # Source                  | # Mitigation                                                                                                                                                     |
-|                   |                                                                                                 |                           |                                                                                                                                                                  |
+| **Bias**          | **Definition**                                                                                  | **Source**                | **Mitigation**                                                                                                                                                   |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Misclassification | The clinical notes are misinterpreted to place the case in the incorrect Group                  |                           | Clinical notes reviewed by multiple reviewers.                                                                                                                   |
 |                   |                                                                                                 |                           |                                                                                                                                                                  |
 |                   |                                                                                                 |                           | Additional analysis checks to review grouping selected versus grouping by calculation against retrieved chart notes.                                             |
