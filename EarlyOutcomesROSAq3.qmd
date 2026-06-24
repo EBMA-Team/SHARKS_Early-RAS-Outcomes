@@ -4999,7 +4999,7 @@ Readmit_Frailty <- MasterSensRead |>
   as.data.frame()
 
 # naniar::miss_var_summary(Readmit_Frailty)
-# naniar::vis_miss(Readmit_Frailty_Vars)
+# naniar::vis_miss(Readmit_Frailty)
 
 # --- 2. Confirm event sparsity across Surgeon clusters ---
 Readmit_Surgeon_Events <- Readmit_Frailty |>
@@ -5032,11 +5032,11 @@ epoxy::epoxy(
 # (e.g. Non-RAS drawn from a narrow, largely non-overlapping subset of
 # surgeons), which would help explain why the Non-RAS HR shifted upward
 # under the frailty adjustment rather than toward the null.
-Readmit_Surgeon_Group_N <- Readmit_Frailty_Vars |>
+Readmit_Surgeon_Group_N <- Readmit_Frailty |>
   dplyr::count(Surgeon, Group1) |>
   tidyr::pivot_wider(names_from = Group1, values_from = n, values_fill = 0)
  
-Readmit_Surgeon_Group_Events <- Readmit_Frailty_Vars |>
+Readmit_Surgeon_Group_Events <- Readmit_Frailty |>
   dplyr::filter(ReadmissionBin == 1) |>
   dplyr::count(Surgeon, Group1) |>
   tidyr::pivot_wider(names_from = Group1, values_from = n, values_fill = 0)
