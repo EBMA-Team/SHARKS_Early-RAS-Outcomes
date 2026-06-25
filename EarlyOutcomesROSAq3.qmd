@@ -49,19 +49,19 @@ A suggested title is the following;
 
 <!--# Critically analyse the informative and balanced nature of the abstract. -->
 
-Abstract is included in the manuscript.
+Abstract and full manuscript needs to be checked for spelling errors and first use of abbreviations.
 
 # Introduction
 
 <!--# Critically assess the justification for conducting the observational study. -->
 
-The introduction is included in the manuscript.
+Recommend aligning the rationale for the study to the innovation framework detailed in the IDEAL series. The HREC protocol *does not* yet provide a detailed justification for the study. Establishing where the contemporary knowledge aligns to the IDEAL framework may assist. Consider the specific setting in which the RAS is used.
 
 ## STROBE \[2\] Background
 
 <!--# Provide a critical analysis of the background information on the research question or problem. -->
 
-Included in the manuscript.
+Considering the detailed discussion regarding the adverse events outcomes (as well as system failure) by the co-authors (29-Apr-2024).
 
 ## STROBE \[3\] Objectives
 
@@ -95,7 +95,7 @@ Study question as per study plan. Comparator updated **8-May-2024**
 
 This was summarised to the following aim in the HREC protocol;
 
-- To assess the clinical utility and cost metrics (where available) before and after the introduction of the robotic-assisted surgery system (ROSA, Zimmer Biomet) into total knee arthroplasty in a public hospital setting.
+- To assess the clinical utility and cost metrics (where available) before and after the introduction of the robotic-assisted surgery (RAS) system (ROSA, Zimmer Biomet) into total knee arthroplasty in a public hospital setting.
 
 - Assess the effect of group on the total incidence of adverse events at up to 90 days follow up
 
@@ -127,7 +127,7 @@ No hypotheses were explicitly stated in the protocol. It is recommended that the
 
 <!--# Prospective observational studies should be designed with a definite evaluation in mind -->
 
-The present analysis includes a definitive evaluation as shown below.
+The IDEAL framework recommends that a definitive evaluation be presented as a part of an observational study - and this has been achieved in this present analysis.
 
 # Methods:
 
@@ -135,7 +135,7 @@ The present analysis includes a definitive evaluation as shown below.
 
 <!--# Critically evaluate the appropriateness of the chosen observational study design (e.g., cohort, case-control). -->
 
-The retrospective analysis provides the most robust comparison between the conditions of having the Robot present versus absent in the same surgeon group, as well as benchmarking against the outcomes of the hospital department.
+The case-control retrospective analysis designed for this analysis provides the most robust comparison between the conditions of having the RAS present versus absent in the same surgeon group, as well as benchmarking against the outcomes of the hospital department.
 
 ::: {#fig-studydesign}
 ![](QEII_SVRpart2_ROSA_Comparison.png)
@@ -147,13 +147,13 @@ Proposed study design
 
 <!--# Observational studies should have a protocol -->
 
-A protocol was submitted as part of the HREC application.
+The author group will need to decide whether they wish to release the protocol (in full or in part) that was developed prior to data collection.
 
 ## STROBE \[5\] Setting:
 
 <!--# Assess the relevance and representativeness of the study setting. -->
 
-The study setting is an orthopaedic department within a medium-sized metropolitan public hospital in a capital city of Australia. The analysis and data collection captured all eligible arthroplasty cases from the commencement date of the department's clinical quality registry to the time of initial analysis.
+The study setting is an orthopaedic department within a medium-sized metropolitan public hospital in a capital city of Australia. The analysis and data collection have captured all eligible arthroplasty cases from the commencement date of the department clinical quality registry to the time of initial analysis. It is asserted that the setting is representative of orthopaedic care in Australia and possesses sufficient equivalence for consideration internationally.
 
 ## Ready libraries
 
@@ -209,7 +209,6 @@ pacman::p_load(# Load required packages
 ```{r}
 #| label: tbl-pkgcite
 #| echo: false
-#| cache: false
 #| tbl-cap: Summary of package usage and citations
 
 pkgs <- grateful::cite_packages(
@@ -228,38 +227,6 @@ knitr::kable(
 
 
 ```
-
-```{r}
-#| echo: false
-#| execute: false
-
-bib_path <- "grateful-refs.bib"  # match the path in your YAML `bibliography:` field
-
-keys_in_bib <- read_lines(bib_path) |>
-  str_subset("^@") |>
-  str_extract("(?<=\\{)[^,]+")
-
-pkgs_table <- grateful::cite_packages(output = "table", out.dir = ".")
-
-keys_in_table <- pkgs_table |>
-  unlist() |>
-  paste(collapse = " ") |>
-  str_extract_all("(?<=@)[A-Za-z0-9._-]+") |>
-  unlist() |>
-  unique()
-
-missing_keys <- setdiff(keys_in_table, keys_in_bib)
-
-if (length(missing_keys) == 0) {
-  epoxy("All citekeys expected by the table are present in {bib_path}.")
-} else {
-  epoxy(
-    "{length(missing_keys)} citekey(s) expected by the table aren't in {bib_path}: {missing_keys&}",
-    .transformer = epoxy_transform("collapse")
-  )
-}
-```
-
 
 ## Authorisations
 
@@ -564,13 +531,13 @@ Hospital3a <- Hospital3 |> mutate(
 
 An initial grouping was constructed to organise the mastersheet for manual verification. Updated groupings as per description in section 4c of [Protocol](https://docs.google.com/document/d/1AkPAvu0a9wtJMC24GHEuPlU_0duDvfvz/edit?usp=sharing&ouid=109449971782917707335&rtpof=true&sd=true "HREC protocol").
 
-- Surgeons confirmed to be contributing to the SHARKS registry and using the implant associated with the Robot - "Robot";
+- Surgeons confirmed to be contributing to the SHARKS registry and using the implant associated with the RAS - "RAS";
 
-- Surgeons confirmed to be contributing to the SHARKS registry and *not* using the implant associated with the Robot - "Pre-Robot";
+- Surgeons confirmed to be contributing to the SHARKS registry and *not* using the implant associated with the RAS - "Pre-RAS";
 
-- Surgeons confirmed *not* to be contributors to the SHARKS registry, but using the implant associated with the Robot system - Group 1b (potential Robot cases)
+- Surgeons confirmed *not* to be contributors to the SHARKS registry, but using the implant associated with the RAS system - Group 1b (potential RAS cases)
 
-- All other cases - "Department"
+- All other cases - "Non-RAS"
 
 ```{r}
 #| label: Update-grouping
@@ -579,10 +546,10 @@ An initial grouping was constructed to organise the mastersheet for manual verif
 
 Hospital4 <- Hospital3a |> mutate(
   Group = case_when(
-  (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device == "Persona"  ~ "Robot",
-    (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device != "Persona"  ~ "Pre-Robot",
-  (ConsultantRecode == "D" | ConsultantRecode == "E" | ConsultantRecode == "F" | ConsultantRecode == "G") & Brand == "Zimmer" & Device == "Persona"  ~ "Possible-Robot",
-  .default = "Department"
+  (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device == "Persona"  ~ "RAS",
+    (ConsultantRecode == "A" | ConsultantRecode == "B" | ConsultantRecode == "C")  & Device != "Persona"  ~ "Pre-RAS",
+  (ConsultantRecode == "D" | ConsultantRecode == "E" | ConsultantRecode == "F" | ConsultantRecode == "G") & Brand == "Zimmer" & Device == "Persona"  ~ "Possible-RAS",
+  .default = "Non-RAS"
 )
 )
 ```
@@ -724,9 +691,9 @@ SHARKSSoc2 <- readr::read_delim(
 
 ```
 
-### Vendor report - Robot Activity
+### Vendor report - RAS Activity
 
-A report from the Robot vendor was extracted and stored in an xlsx file and imported into the analysis as described above. The vendor report was read in as an input into the analysis and temporary identifiers were created as described.
+A report from the RAS vendor was extracted and stored in an xlsx file and imported into the analysis as described above. The vendor report was read in as an input into the analysis and temporary identifiers were created as described.
 
 ```{r}
 #| echo: false
@@ -969,7 +936,7 @@ The mastersheetv3 was split into separate tables for further chart review by the
 |                     |                              | Constraint           |
 +---------------------+------------------------------+----------------------+
 
-Chart Review Variables Group Pre-Robot and Department
+Chart Review Variables Group Pre-RAS and Non-RAS
 :::
 
 A [web-based form](https://questionpro.com.au/t/ARnFiZRugR "Complications capture form") (QuestionPro, USA) was generated to capture key details of adverse events and complications occurring within the surgery (intraoperative) and up to 90 days postoperatively. The patient URN was used to link the information captured in the forms to the mastersheet.
@@ -985,7 +952,7 @@ Master tables were read in with preliminary group labelling.
 # Authenticate for sheets using the same token
 gs4_auth(token = googledrive::drive_token())
 
-#Groups Robot (1) and Pre-Robot (2) (Preliminary labelling)
+#Groups RAS (1) and Pre-RAS (2) (Preliminary labelling)
 G1and2 <- read_sheet(
 ss = SheetIDs$MasterList,
 sheet = "ChartReviewG1-2v2",
@@ -996,7 +963,7 @@ trim_ws = TRUE
 
 
 
-#Groups Potential-Robot (1b) and Department (3) (Preliminary labelling)
+#Groups Potential-RAS (1b) and Non-RAS (3) (Preliminary labelling)
 G1band3 <- read_sheet(
 ss = SheetIDs$MasterList,
 sheet = "ChartReviewG1b-3",
@@ -1030,7 +997,7 @@ The mastersheet tables returned a combined {nrow(G1and2) + nrow(G1band3)} record
 
 ### Prepare dataset
 
-The dataset was prepared for further analysis by creating new variables, recoding existing variables and joining tables as required. Initial grouping was assessed by cross-matching to the alignment referencing system retrieved from chart review and the SHARKS registry. Mismatches were flagged for manual review.
+The dataset was prepared for further analysis through creating new variables, recoding existing variables and merging between tables as required.
 
 ```{r}
 #| label: process-table-1A
@@ -1038,8 +1005,8 @@ The dataset was prepared for further analysis by creating new variables, recodin
 G1and2_1A <- G1and2 |> select(!(ComplicationForm)) |> 
   mutate(
     GroupUpdated = case_when(
-      Group == 1 ~ "Robot",
-      Group == 2 ~ "Pre-Robot"
+      Group == 1 ~ "RAS",
+      Group == 2 ~ "Pre-RAS"
     ),
     SurgerySide = stringr::str_to_title(SurgerySide),
     BilateralStatus2 = case_when(
@@ -1057,7 +1024,7 @@ G1and2_1A <- G1and2 |> select(!(ComplicationForm)) |>
     .default = "No"
   ),,
   GroupCheck = case_when(
-      (GroupUpdated == "Robot" & AlignmentReferencing == "Robotic")|(Group != "Robot" & AlignmentReferencing != "Robotic") ~ "Correct",
+      (GroupUpdated == "RAS" & AlignmentReferencing == "Robotic")|(Group != "RAS" & AlignmentReferencing != "Robotic") ~ "Correct",
       .default = "Incorrect"
         )
   ) 
@@ -1092,8 +1059,8 @@ G1and2_1B <- G1and2_1A |> dplyr::mutate(
 
 G1band3_1 <- G1band3 |> select(!(ComplicationForm)) |> mutate(
   GroupUpdated = case_when(
-    Group == "3" ~ "Department",
-    Group == "1b" ~ "Potential-Robot"
+    Group == "3" ~ "Non-RAS",
+    Group == "1b" ~ "Potential-RAS"
   ),
   SurgerySide = stringr::str_to_title(SurgerySide),
     BilateralStatus2 = case_when(
@@ -1111,7 +1078,7 @@ G1band3_1 <- G1band3 |> select(!(ComplicationForm)) |> mutate(
     .default = "No"
   ),
     GroupCheck = case_when(
-      (GroupUpdated == "Potential-Robot" & AlignmentReferencing == "Robotic")|(Group != "Potential-Robot" & (AlignmentReferencing != "Robotic")|is.na(AlignmentReferencing)) ~ "Correct",
+      (GroupUpdated == "Potential-RAS" & AlignmentReferencing == "Robotic")|(Group != "Potential-RAS" & (AlignmentReferencing != "Robotic")|is.na(AlignmentReferencing)) ~ "Correct",
       .default = "Incorrect"
       ),
     AgeAtSurgery = as.numeric(as.duration(interval(ymd(DOB), ymd(SurgeryDate))),"years"),
@@ -1124,7 +1091,7 @@ G1band3_1 <- G1band3 |> select(!(ComplicationForm)) |> mutate(
 
 ```
 
-Individual input tables were joined into a MasterSheet and additional identifier variables created as needed to join tables with varying identifying information available.
+Individual input tables were joined into a MasterSheet and additional variables created as needed.
 
 ```{r}
 #| label: mastersheet-1
@@ -1255,11 +1222,11 @@ MasterSheet2 <- MasterSheet1 |> filter(
     ) 
   ) |> mutate(
     GroupCorrected = case_when(
-  (AlignmentReferencing == "Robotic") | (is.na(AlignmentReferencing) & (TempIDPart %in% VendorReport$TempIDPart)) ~ "Robot",
-GroupUpdated == "Pre-Robot" | (GroupUpdated == "Robot" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Pre-Robot",
-GroupUpdated == "Robot" & is.na(AlignmentReferencing) & !(TempIDPart %in% VendorReport$TempIDPart) ~ "Pre-Robot",
-GroupUpdated == "Department" | (GroupUpdated == "Potential-Robot" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Department",
-  .default = "Department"
+  (AlignmentReferencing == "Robotic") | (is.na(AlignmentReferencing) & (TempIDPart %in% VendorReport$TempIDPart)) ~ "RAS",
+GroupUpdated == "Pre-RAS" | (GroupUpdated == "RAS" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Pre-RAS",
+GroupUpdated == "RAS" & is.na(AlignmentReferencing) & !(TempIDPart %in% VendorReport$TempIDPart) ~ "Pre-RAS",
+GroupUpdated == "Non-RAS" | (GroupUpdated == "Potential-RAS" & !is.na(AlignmentReferencing) & AlignmentReferencing != "Robotic") ~ "Non-RAS",
+  .default = "Non-RAS"
     )
 ) |> arrange(
   SurgeryDate
@@ -1281,160 +1248,6 @@ Unsure <- MasterSheet2 |> filter(
 )
 
 ```
-
-## STROBE \[9\] Bias:
-
-*Critically analyze potential sources of bias and the adequacy of methods used to address them.*
-
-Observational cohort analyses are subject to a number of biases [@Brown2023] . Specific to this analysis, the following considerations are noted.
-
-::: {#tbl-biases}
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                   |                                                                                                 |                           |                                                                                                                                                                            |
-+===================+=================================================================================================+===========================+============================================================================================================================================================================+
-| **Bias**          | **Definition**                                                                                  | **Source**                | **Mitigation**                                                                                                                                                             |
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Misclassification | The clinical notes are misinterpreted to place the case in the incorrect Group                  |                           | Clinical notes reviewed by multiple reviewers.                                                                                                                             |
-|                   |                                                                                                 |                           |                                                                                                                                                                            |
-|                   |                                                                                                 |                           | Additional analysis checks to review grouping selected versus grouping by calculation against retrieved chart notes.                                                       |
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Confounder        | A variable of interest and a target outcome simultaneously influenced by a third variable       | [@tennant2020]            | Regression models used to adjust models for estimated confounders identified through minimal adjustment sets using directed acyclic graphs.                                |
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Missing data      | The absence of a data value where a treatment record is eligible to have a data value collected | [@carroll2020]            | Missingness assessed to be of low impact (low incidence) to analysis dataset.                                                                                              |
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Pseudoreplication | Analyse data while ignoring dependency between observations. Inadequate model specification.    | [@davies2015; @lazic2010] | Used mixed effects linear model for procedure duration with patient identifier as random effect. Cluster for patient in analyses of continuous and time-to-event outcomes. |
-+-------------------+-------------------------------------------------------------------------------------------------+---------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-Biases in analysis of a comparative observational cohort analysis.
-:::
-
-## Missing Data
-
-Missingness is an unavoidable characteristic of clinical datasets, in particular patients from non-english speaking or lower socioeconomic backgrounds are less likely to respond to patient-reported outcome measures in lower limb arthroplasty [@konopka2023]. The mastersheet was adjusted using *tidyverse* to include only the required columns and to convert categorical columns to factors. The *naniar* package [@naniar] was used to generate a summary figure of missingness in the key variables of the analysis.
-
-Missingness in covariates and descriptors (Age, Sex, Comorbidities, BMI, Surgery characteristics) were backfilled from the SHARKS registry dataset and missingness re-examined for key demographics. Individual cases that were identified as exclusions (surgery type, revision) through the chart review process were manually excluded in the code. 
-
-```{r}
-
-MasterSheetMiss <- MasterSheet5a |> filter(
-  if_any(c(AgeAtSurgery,Sex,ComorbidDiabetes,BMI,Surgery_ProcedureName:OperationFinish), ~is.na(.))
-)
-
-
-SHARKSSoc2a <- SHARKSSoc2 |> rename(
-  PatientID = "PatientId"
-  ) |> mutate(
-  TempIDPart = paste0(PatientID,SurgerySide1)
-) |> relocate(
-  TempIDPart
-)
-
-SHARKSBackfill <- SHARKSSoc2a |> filter(
-  TempIDPart %in% MasterSheetMiss$TempIDPart
-)
-
-MasterSheet5b <- MasterSheet5a |> filter(
-  TempIDPart %in% SHARKSBackfill$TempIDPart
-) |> filter(
-  !(TempIDFull == "412600Right44896")
-)
-
-MismatchSHARK <- anti_join(
-  MasterSheet5b,
-  SHARKSBackfill,
-  by = "TempIDPart"
-)
-
-MissingMaster <- naniar::as_shadow(MasterSheet5b)  |> mutate(Sheet = "StudyMaster")
-
-MissingSHARKS <- naniar::as_shadow(
-  SHARKSBackfill
-  ) |> mutate(
-    Sheet = "RegistrySnapshot"
-    )
-
-MissingComp <-bind_rows(
-  MissingMaster,
-  MissingSHARKS
-) |> relocate(
-  Sheet,
-  .before = ProgressIndicator_NA
-)
-
-
-
-```
-
-```{r}
-#| label: tbl-surgical-avail
-#| tbl-cap: "Summary of missing values within surgical fields of analysis dataset."
-
-TableMiss1 <- tbl_summary(
-  MissingComp |> dplyr::select(
-    Sheet,
-    Surgery_ProcedureName_NA:OperationFinish_NA
-    ),
-  by = Sheet,
-type = all_categorical() ~ "dichotomous",
-value = everything() ~ "NA"
-)
-
-as_flex_table(TableMiss1) |> flextable::set_table_properties(
-  layout = "autofit",
-  width = 0.15,
-  align = "center",
-  opts_word = list(
-    split = TRUE
-    )
-  )
-```
-
-```{r}
-#| label: tbl-dataset-avail
-#| tbl-cap: "Overall missingness rates for key variables within the analysis dataset."
-
-MissingMaster2 <- naniar::as_shadow(MasterSheet5a) 
-
-TableMiss2 <- tbl_summary(
-  MissingMaster2 |> dplyr::select(
-    AgeAtSurgery_NA,
-    Sex_NA,
-    BMI_NA,
-    ComorbidDiabetes_NA,
-    Surgery_ProcedureName_NA:OperationFinish_NA),
-type = all_categorical() ~ "dichotomous",
-value = everything() ~ "NA"
-)
-
-as_flex_table(TableMiss2) |> flextable::set_table_properties(
-  layout = "autofit",
-  width = 0.15,
-  align = "center",
-  opts_word = list(
-    split = TRUE
-    )
-  )
-
-```
-
-```{r}
-#| label: fig-keyvar-avail
-#| fig-cap: "Summary of missingness of key demographic variables for analysis sample."
-
-FigureMiss3 <- gg_miss_var(MasterSheet5a |> dplyr::select(
-  AgeAtSurgery,
-  Sex,
-  BMI,
-  ComorbidDiabetes,
-  ComorbidSmoke,
-),
-show_pct = TRUE
-)
-
-knitr::knit_print(FigureMiss3)
-
-```
-
 
 The complication response table was filtered for entries missing a patient record identifier.
 
@@ -1535,6 +1348,7 @@ The reduction in missing data was confirmed before and after the table merge to 
 #| fig-cap: "Missingness in AgeatSurgery and Sex before (top) and after (bottom) merge between MasterSheet and SHARKS Snapshot."
 
 
+
 FigureMiss1 <- gg_miss_var(MasterSheet2 |> dplyr::select(
   AgeAtSurgery,
   Sex
@@ -1556,8 +1370,6 @@ FigureMiss1 / FigureMiss2
 
 *Critique the definition of the study population, including inclusion and exclusion criteria.*
 
-Every attempt was made to generate a broad population from the department case load that identified the group of interest (case performed with the Robot system) and reasonable comparator groups to benchmark the performance of the system compared to historical data. As with any observational study, particularly one that is retrospective in nature, separation between the definition of the study groups and other factors such as surgeon or technique choice are difficult to avoid. Sources of bias such as pseudoreplication and confounding were mitigated through analysis design choices, however the study population remains a challenging cohort for this type of analysis.
-
 ### IDEAL Stage2b \[2\]: Inclusion-criteria
 
 *Observational studies should be diagnosis-based, rather than procedure-based whenever possible*
@@ -1565,14 +1377,12 @@ Every attempt was made to generate a broad population from the department case l
 The criteria for this study was procedure based - examining only cases that received a total knee replacement within the department. Inclusion criteria was confirmed by establishing the following during *chart review* (rounds 1 and 2);
 
 - Date of Surgery \< **1-Mar-2023**
+
 - Surgery type (arthroplasty)
 
-Exclusion criteria included the presence of any of the followiing terms in the procedure description or procedure type;
+Exclusion criteria included;
 
-- Revision
-- Reoperation
-- Procedure other than knee arthroplasty
-- Arthroplasty type (revision vs primary) could not be confirmed
+- Revision \| Reoperation \| Procedure other than knee arthroplasty \| Arthroplasty type (revision vs primary) could not be confirmed
 
 ## STROBE \[7\] Variables:
 
@@ -2292,7 +2102,7 @@ MasterPROMs <- left_join(
 ),
 by = "TempIDFull"
 ) |> mutate(
-    Group1 = factor(GroupCorrected, levels = c("Robot", "Pre-Robot", "Department"))
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
 )
 
 ```
@@ -2349,12 +2159,164 @@ as_flex_table(TablePROMs) |> flextable::set_table_properties(
   
 ```
 
+## STROBE \[9\] Bias:
+
+*Critically analyze potential sources of bias and the adequacy of methods used to address them.*
+
+Retrospective cohort analyses are subject to a number of biases as noted by (citation). Specific to this analysis, the following considerations are noted below.
+
+::: {#tbl-biases}
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|                   |                                                                                                 |                           |                                                                                                                                                                  |
++===================+=================================================================================================+===========================+==================================================================================================================================================================+
+| **Bias**          | **Definition**                                                                                  | **Source**                | **Mitigation**                                                                                                                                                   |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Misclassification | The clinical notes are misinterpreted to place the case in the incorrect Group                  |                           | Clinical notes reviewed by multiple reviewers.                                                                                                                   |
+|                   |                                                                                                 |                           |                                                                                                                                                                  |
+|                   |                                                                                                 |                           | Additional analysis checks to review grouping selected versus grouping by calculation against retrieved chart notes.                                             |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Confounder        | A variable of interest and a target outcome simultaneously influenced by a third variable       | [@tennant2020]            | Regression models used to adjust models for estimated confounders identified through minimal adjustment sets using directed acyclic graphs.                      |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Missing data      | The absence of a data value where a treatment record is eligible to have a data value collected | [@carroll2020]            | Missingness assessed to be of low impact (low incidence) to analysis dataset.                                                                                    |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pseudoreplication | Analyse data while ignoring dependency between observations. Inadequate model specification.    | [@davies2015; @lazic2010] | Used mixed effects linear model for procedure duration with patient identifier as random effect. Cluster for patient in survival (all-cause failure and retear). |
++-------------------+-------------------------------------------------------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Biases in analysis of a comparative observational cohort analysis.
+:::
+
+## Missing Data
+
+Missingness is an unavoidable characteristic of clinical datasets, in particular patients from non-english speaking or lower socioeconomic backgrounds are less likely to respond to patient-reported outcome measures in lower limb arthroplasty [@konopka2023]. The mastersheet was adjusted using *tidyverse* to include only the required columns and to convert categorical columns to factors. The *naniar* package [@naniar] was used to generate a summary figure of missingness in the key variables of the analysis.
+
+Missingness was assessed to be low enough to be ignored from the analysis.
+
+```{r}
+
+MasterSheetMiss <- MasterSheet5a |> filter(
+  if_any(c(AgeAtSurgery,Sex,ComorbidDiabetes,BMI,Surgery_ProcedureName:OperationFinish), ~is.na(.))
+)
+
+
+SHARKSSoc2a <- SHARKSSoc2 |> rename(
+  PatientID = "PatientId"
+  ) |> mutate(
+  TempIDPart = paste0(PatientID,SurgerySide1)
+) |> relocate(
+  TempIDPart
+)
+
+SHARKSBackfill <- SHARKSSoc2a |> filter(
+  TempIDPart %in% MasterSheetMiss$TempIDPart
+)
+
+MasterSheet5b <- MasterSheet5a |> filter(
+  TempIDPart %in% SHARKSBackfill$TempIDPart
+) |> filter(
+  !(TempIDFull == "412600Right44896")
+)
+
+MismatchSHARK <- anti_join(
+  MasterSheet5b,
+  SHARKSBackfill,
+  by = "TempIDPart"
+)
+
+MissingMaster <- naniar::as_shadow(MasterSheet5b)  |> mutate(Sheet = "StudyMaster")
+
+MissingSHARKS <- naniar::as_shadow(
+  SHARKSBackfill
+  ) |> mutate(
+    Sheet = "RegistrySnapshot"
+    )
+
+MissingComp <-bind_rows(
+  MissingMaster,
+  MissingSHARKS
+) |> relocate(
+  Sheet,
+  .before = ProgressIndicator_NA
+)
+
+
+
+```
+
+```{r}
+#| label: tbl-surgical-avail
+#| tbl-cap: "Summary of missing values within surgical fields of analysis dataset."
+
+TableMiss1 <- tbl_summary(
+  MissingComp |> dplyr::select(
+    Sheet,
+    Surgery_ProcedureName_NA:OperationFinish_NA
+    ),
+  by = Sheet,
+type = all_categorical() ~ "dichotomous",
+value = everything() ~ "NA"
+)
+
+as_flex_table(TableMiss1) |> flextable::set_table_properties(
+  layout = "autofit",
+  width = 0.15,
+  align = "center",
+  opts_word = list(
+    split = TRUE
+    )
+  )
+```
+
+```{r}
+#| label: tbl-dataset-avail
+#| tbl-cap: "Overall missingness rates for key variables within the analysis dataset."
+
+MissingMaster2 <- naniar::as_shadow(MasterSheet5a) 
+
+TableMiss2 <- tbl_summary(
+  MissingMaster2 |> dplyr::select(
+    AgeAtSurgery_NA,
+    Sex_NA,
+    BMI_NA,
+    ComorbidDiabetes_NA,
+    Surgery_ProcedureName_NA:OperationFinish_NA),
+type = all_categorical() ~ "dichotomous",
+value = everything() ~ "NA"
+)
+
+as_flex_table(TableMiss2) |> flextable::set_table_properties(
+  layout = "autofit",
+  width = 0.15,
+  align = "center",
+  opts_word = list(
+    split = TRUE
+    )
+  )
+
+```
+
+```{r}
+#| label: fig-keyvar-avail
+#| fig-cap: "Summary of missingness of key demographic variables for analysis sample."
+
+FigureMiss3 <- gg_miss_var(MasterSheet5a |> dplyr::select(
+  AgeAtSurgery,
+  Sex,
+  BMI,
+  ComorbidDiabetes,
+  ComorbidSmoke,
+),
+show_pct = TRUE
+)
+
+knitr::knit_print(FigureMiss3)
+
+```
 
 ## STROBE \[11\] Quantitative variables:
 
 *Evaluate the analytical choices of the quantitative variables within the dataset.*
 
-Quantitative variables in this analysis fall into three categories; continuous covariates (age at surgery, body mass index, procedure duration), binary adverse event indicators (presence/absence of each complication category, used for the univariate comparisons in Section 10.3.1), and time-to-event variables (used for the survival models in Sections 11.4.2 and 11.5). For time-to-event variables, each treated joint (TempIDPart) could record more than one adverse event over the follow-up period, so occurrence dates were ordered chronologically per joint and converted into a sequence of start–stop intervals, allowing multiple complications for the same joint to be represented without losing the order in which they occurred. Where a specific adverse event of interest (superficial infection, stiffness, readmission, thromboembolism) did not occur for a given joint, time was right-censored at 90 days post-surgery, consistent with the study's follow-up window; the first occurrence of each event type was then carried forward as the input to the corresponding survival model.
+Set variables for survival and logistic regression
 
 ```{r}
 ComplicMaster <- bind_rows(
@@ -2429,7 +2391,7 @@ ComplicMaster <- bind_rows(
     RowNum,
     GroupCorrected
   ) |> ungroup() |> mutate(
-    Group1 = factor(GroupCorrected, levels = c("Robot", "Pre-Robot", "Department"))
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
   )
 
 ```
@@ -2478,7 +2440,7 @@ MasterSheet6 <- MasterSheet5a |>
     Readmission = if_else(TempIDPart %in% ComplicReadmission$TempIDPart,"Yes","No"),
     Reoperation = if_else(TempIDPart %in% ComplicReoperation$TempIDPart,"Yes","No"),
     Revision = if_else(TempIDPart %in% ComplicRevision$TempIDPart,"Yes","No"),
-    Group1 = factor(GroupCorrected, levels = c("Robot", "Pre-Robot", "Department"))
+    Group1 = factor(GroupCorrected, levels = c("RAS", "Pre-RAS", "Non-RAS"))
   )
   
 ```
@@ -2802,7 +2764,7 @@ knitr::knit_print(Figure6)
 
 ```
 
-The procedure duration outcome is characterised by positive values, overdispersion (high variance) and right skewness (some cases take substantially longer than the group median) (@fig-duration-dist and @fig-duration-predict), as well as overdispersion (variance exceeding the average, particularly in the Pre-Robot group). Although ordinary least squares is a popular regression technique for continuous data, these features of the dataset render this approach inappropriate. The *gamma* distribution is a continuous probability distribution that is suitable for modelling positive values that are skewed and has been previously demonstrated to be a robust choice in skewed medical data [@malehi2015]. The dataset is also at risk of pseudoreplication due to the presence of multiple data entries for the same patient with bilateral procedures. To account for this non-independence, a patient-level random interecept was included in the model (*1\|PatientID*), allowing each patient's repeated observations to share a common baseline, while fixed efffects estimated the population-average effect of Group on procedure duration. A mixed-effects gamma regression model ("log" link function) with the minimal adjustment set as identified in the DAG, was applied using *lme4* package (v`{r} utils::packageVersion("lme4")`). The log link was selected over alternative functions within the gamma family (inverse, identify, square root), based on model fit. All four link functions were compared using Akaike information criteria and Bayesian information criteria. The rationale and analysis for the selection are presented in STROBE \[17\] Other Analyses. Model predictions and post-comparisons between levels of fixed effects were calculated using the *marginaleffects* package package (v`{r} utils::packageVersion("marginaleffects")`).
+The procedure duration outcome is characterised by positive values, overdispersion (high variance) and right skewness (some cases take substantially longer than the group median) (@fig-duration-dist and @fig-duration-predict), as well as overdispersion (variance exceeding the average, particularly in the pre-RAS group). Although ordinary least squares is a popular regression technique for continuous data, these features of the dataset render this approach inappropriate. The *gamma* distribution is a continuous probability distribution that is suitable for modelling positive values that are skewed and has been previously demonstrated to be a robust choice in skewed medical data [@malehi2015]. The master table was subset for procedure duration analysis. The dataset is also at risk of pseudoreplication due to the presence of multiple data entries for the same patient with bilateral procedures. To account for this non-independence, a patient-level random interecept was included in the model specific (*1\|PatientID*), allowing each patient's repeated observations to share a common baseline, while fixed efffects estimated the population-average effect of Group on procedure duration. A mixed-effects gamma regression model ("log" link function) with the minimal adjustment set as identified in the DAG, was applied using *lme4* package (v`{r} utils::packageVersion("lme4")`). The log link was selected over alternative functions within the gamma family (inverse, identify, square root), based on model fit. All four link functions were compared using Akaike information criteria and Bayesian information criteria. The rationale and analysis for the selection are presented in STROBE \[17\] Other Analyses. Model predictions and post-comparisons between levels of fixed effects were calculated using the *marginaleffects* package package (v`{r} utils::packageVersion("marginaleffects")`).
 
 ```{r}
 #| label: fig-duration-dist
@@ -3727,13 +3689,13 @@ as_flex_table(Table17) |> flextable::set_table_properties(
   )
 ```
 
-The potential for a learning curve within the Robot group was visualised using graphical plots of sequential cases by surgeon.
+The potential for a learning curve within the RAS group was visualised using graphical plots of sequential cases by surgeon.
 
 ```{r}
 
-# Within-surgeon case sequence for Robot cases only
+# Within-surgeon case sequence for RAS cases only
 LearningCurve_Analysis <- MasterSheet6 |>
-  dplyr::filter(Group1 == "Robot") |>
+  dplyr::filter(Group1 == "RAS") |>
   dplyr::select(Surgeon, SurgeryDate, ProcedureDuration) |>
   dplyr::arrange(Surgeon, SurgeryDate) |>
   dplyr::group_by(Surgeon) |>
@@ -3742,12 +3704,12 @@ LearningCurve_Analysis <- MasterSheet6 |>
 
 # Case volume check per surgeon (for transparency on which panels are sparse)
 # LearningCurve_Analysis |>
-#   dplyr::count(Surgeon, name = "Robot_n")
+#   dplyr::count(Surgeon, name = "RAS_n")
 ```
 
 ```{r}
 #| label: fig-learning
-#| fig-cap: "Within-surgeon procedure duration by sequential Robot case number"
+#| fig-cap: "Within-surgeon procedure duration by sequential RAS case number"
 LearningCurveFig <- ggplot(
   data = LearningCurve_Analysis,
   mapping = aes(x = CaseSequence, y = ProcedureDuration)
@@ -3756,7 +3718,7 @@ LearningCurveFig <- ggplot(
   geom_smooth(method = "loess", se = TRUE, linewidth = 0.8) +
   facet_wrap(~ Surgeon, scales = "free_x") +
   labs(
-    x = "Sequential Robot case number (within surgeon)",
+    x = "Sequential RAS case number (within surgeon)",
     y = "Procedure duration (minutes)"
   ) +
   theme_minimal()
@@ -3764,7 +3726,7 @@ LearningCurveFig <- ggplot(
 knitr::knit_print(LearningCurveFig)
 ```
 
-There were no visually discernible changes in procedure duration consistent with a learning curve within each Robot surgeon across sequential cases. A learning curve was not considered to be present within the procedure duration data.
+There were no visually discernible changes in procedure duration consistent with a learning curve within each RAS surgeon across sequential cases. A learning curve was not considered to be present within the procedure duration data.
 
 # Results:
 
@@ -3932,13 +3894,13 @@ as_flex_table(TableOutcomes) |> flextable::set_table_properties(
 
 ```{epoxy}
 
-The Robot group displayed {gtsummary::inline_text(TableOutcomes, variable = Delivery, column = "stat_1")} instances of the system failing intraoperatively. 
+The RAS group displayed {gtsummary::inline_text(TableOutcomes, variable = Delivery, column = "stat_1")} instances of the system failing intraoperatively. 
 
 ```
 
 ```{r}
-#| label: tbl-Robotcomp
-#| tbl-cap: "Complications identified intraoperatively with Robot delivery."
+#| label: tbl-rascomp
+#| tbl-cap: "Complications identified intraoperatively with RAS delivery."
 
 DeliveryComp <- ComplicResponse7 |> filter(
   Category_Value == "Delivery"
@@ -4097,9 +4059,9 @@ TableDurationSum <- avg_predictions(Duration_model,
                               conf_level = 0.95,
                               type = "response") |> mutate(
                                 standarddev = case_when(
-                                  Group1 == "Pre-Robot" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Pre-Robot")))),
-                                  Group1 == "Department" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Department")))),
-                                  Group1 == "Robot" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Robot")))),
+                                  Group1 == "Pre-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Pre-RAS")))),
+                                  Group1 == "Non-RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "Non-RAS")))),
+                                  Group1 == "RAS" ~ std.error*(sqrt(nrow(Duration_Analysis |> filter(Group1 == "RAS")))),
                                 )
                               ) |> dplyr::select(
                                 Group1,
@@ -4119,11 +4081,11 @@ knitr::knit_print(TableDurationSum)
 
 ```{epoxy}
 
-The beta coefficient for the Department compared to the Robot group {gtsummary::inline_text(TableDuration, variable = Group1, level = "Department",
+The beta coefficient for the Department compared to the Robot group {gtsummary::inline_text(TableDuration, variable = Group1, level = "Non-RAS",
             pattern = "{estimate} (95% CI {conf.low} - {conf.high}],{p.value})")} was not significant. Similarly, cases with a unilateral procedure were not significantly shorter than bilateral, {gtsummary::inline_text(TableDuration, variable = BilateralStatus,
             pattern = "{estimate} (95% CI {conf.low} - {conf.high}),{p.value})")}.
-This translated to an increase of {abs(round(DurationPost$`_data`$estimate[2],1))} minutes ({abs(round(DurationPost$`_data`$conf.high[2],1))} - {abs(round(DurationPost$`_data`$conf.low[2],1))}, p = {round(DurationPost$`_data`$p.value[2],3)}) for Robot cases compared to Department. 
-However, a significant decrease was observed in the average procedure duration of {abs(round(DurationPost$`_data`$estimate[3],1))} ({(round(DurationPost$`_data`$conf.low[3],1))} - {round(DurationPost$`_data`$conf.high[3],1)}, p = {abs(round(DurationPost$`_data`$p.value[3],3))}) minutes per case for Robot cases, compared to Pre-Robot (@tbl-duration-gamma). 
+This translated to an increase of {abs(round(DurationPost$`_data`$estimate[2],1))} minutes ({abs(round(DurationPost$`_data`$conf.high[2],1))} - {abs(round(DurationPost$`_data`$conf.low[2],1))}, p = {round(DurationPost$`_data`$p.value[2],3)}) for RAS cases compared to Non-RAS. 
+However, a significant decrease was observed in the average procedure duration of {abs(round(DurationPost$`_data`$estimate[3],1))} ({(round(DurationPost$`_data`$conf.low[3],1))} - {round(DurationPost$`_data`$conf.high[3],1)}, p = {abs(round(DurationPost$`_data`$p.value[3],3))}) minutes per case for RAS cases, compared to Pre-RAS (@tbl-duration-gamma). 
 
 ```
 
@@ -4658,7 +4620,7 @@ as_flex_table(TableKMComb) |> flextable::set_table_properties(
 
 ```{epoxy}
 
-The survival rate at 90 day follow up for males undergoing Robot was {gtsummary::inline_text(TableKM2, time = 90, level = "Robot",
+The survival rate at 90 day follow up for males undergoing RAS was {gtsummary::inline_text(TableKM2, time = 90, level = "RAS",
             pattern = "{estimate} [95% CI {conf.low} - {conf.high}]")}, but this did not reach significance when compared to the other groups ({gtsummary::inline_text(TableKM2, column = p.value)}).
 
 ```
@@ -4888,7 +4850,7 @@ as_flex_table(TableDurMerge) |>
   )
 ```
 
-The crossed random effects model with Surgeon added as a random intercept shows a noticeable effect on the magnitude, direction and significance of the coefficients compared to the primary model (@tbl-surgeon-regression1). However, the expanded model relies on within-surgeon contrasts with some balance to estimate the fixed effect of Group. As shown by the counts (@tbl-casevolume), this assumption is well supported for the Pre-Robot vs Robot contrast, given that Surgeons A, B and C contributed substantively to both groups. However, within-surgeon identification for the Department contrast is comparatively weak. Surgeon D performed Department cases exclusively, while the Robot-predominant surgeons (E,F) contributed minimal Department case volume. Only Surgeon G contributed substantially to both groups, making the within-surgeon Department estimate disproportionately informed by this Surgeon's dataset, supplemented by partial pooling across the random-effects distribution for surgeon with little or no direct contrast. The Department coefficient from the expanded model should be interpreted with caution, as it reflects a combination of within-surgeon adjustment and model-based shrinkage rather than uniformly identified contrast across the surgeon cohort.
+The crossed random effects model with Surgeon added as a random intercept shows a noticeable effect on the magnitude, direction and significance of the coefficients compared to the primary model (@tbl-surgeon-regression1). However, the expanded model relies on within-surgeon contrasts with some balance to estimate the fixed effect of Group. As shown by the counts (@tbl-casevolume), this assumption is well supported for the Pre-RAS vs RAS contrast, given that Surgeons A, B and C contributed substantively to both groups. However, within-surgeon identification for the Non-RAS contrast is comparatively weak. Surgeon D performed Non-RAS cases exclusively, while the RAS-predominant surgeons (E,F) contributed minimal Non-RAS case volume. Only Surgeon G contributed substantially to both groups, making the within-surgeon Non-RAS estimate disproportionately informed by this Surgeon's dataset, supplemented by partial pooling across the random-effects distribution for surgeon with little or no direct contrast. The Non-RAS coefficient from the expanded model should be interpreted with caution, as it reflects a combination of within-surgeon adjustment and model-based shrinkage rather than uniformly identified contrast across the surgeon cohort.
 
 ```{r}
 #| label: tbl-surgeon-regression2
@@ -4921,9 +4883,9 @@ TableDurationSum_Surgeon <- avg_predictions(
 ) |>
   mutate(
     standarddev = case_when(
-      Group1 == "Pre-Robot"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Pre-Robot")))),
-      Group1 == "Department"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Department")))),
-      Group1 == "Robot"      ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Robot"))))
+      Group1 == "Pre-RAS"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Pre-RAS")))),
+      Group1 == "Non-RAS"  ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "Non-RAS")))),
+      Group1 == "RAS"      ~ std.error * (sqrt(nrow(Duration_Analysis_Surgeon |> filter(Group1 == "RAS"))))
     )
   )
 ```
@@ -5095,8 +5057,8 @@ epoxy::epoxy(
 
 # --- 2b. Surgeon x Group1 cross-tabulation ---
 # Checks whether Surgeon and Group1 are themselves confounded by design
-# (e.g. Department drawn from a narrow, largely non-overlapping subset of
-# surgeons), which would help explain why the Department HR shifted upward
+# (e.g. Non-RAS drawn from a narrow, largely non-overlapping subset of
+# surgeons), which would help explain why the Non-RAS HR shifted upward
 # under the frailty adjustment rather than toward the null.
 Readmit_Surgeon_Group_N <- Readmit_Frailty |>
   dplyr::count(Surgeon, Group1) |>
@@ -5169,8 +5131,8 @@ if (length(Readmit_Frailty_Warnings) > 0) {
 
 ModelCox4_Frailty_Table <- tibble::tribble(
   ~Term,                          ~coef,    ~`se(coef)`, ~se2,    ~Chisq,  ~DF,  ~p,
-  "Group1Pre-Robot",                -0.4309,  0.4496,      0.4387,  0.9184,  1.00, 0.338,
-  "Group1Department",                0.8060,   0.4558,      0.3774,  3.1264,  1.00, 0.077,
+  "Group1Pre-RAS",                -0.4309,  0.4496,      0.4387,  0.9184,  1.00, 0.338,
+  "Group1Non-RAS",                0.8060,   0.4558,      0.3774,  3.1264,  1.00, 0.077,
   "SexMale",                      0.6140,   0.3307,      0.3293,  3.4465,  1.00, 0.063,
   "ComorbidSmokeYes",             -0.6300,  1.0228,      1.0214,  0.3795,  1.00, 0.538,
   "ComorbidCardiovascularYes",     0.0000,  0.0000,      NA,      NA,      1.00, NA,
@@ -5316,23 +5278,24 @@ Readmit_Frailty_P <- ModelCox4_Frailty_Table$p[
   ModelCox4_Frailty_Table$Term == "frailty(Surgeon)"
 ]
 
-# Quantify how concentrated Department readmission events are across surgeons -
+# Quantify how concentrated Non-RAS readmission events are across surgeons -
 # motivated by the cross-tab showing 2 surgeons carry all but 1 event.
-Readmit_Department_Total <- sum(Readmit_Surgeon_Group_Events[["Department"]])
-Readmit_Department_Top2 <- sum(
-  sort(Readmit_Surgeon_Group_Events[["Department"]], decreasing = TRUE)[1:2]
+Readmit_NonRAS_Total <- sum(Readmit_Surgeon_Group_Events[["Non-RAS"]])
+Readmit_NonRAS_Top2 <- sum(
+  sort(Readmit_Surgeon_Group_Events[["Non-RAS"]], decreasing = TRUE)[1:2]
 )
-Readmit_Department_Concentration <- Readmit_Department_Top2 / Readmit_Department_Total
+Readmit_NonRAS_Concentration <- Readmit_NonRAS_Top2 / Readmit_NonRAS_Total
 
 ```
 
 ```{epoxy}
+#| label: readmit-summary
 
 A shared gamma frailty term for Surgeon was added to the primary readmission model. Model fit was {if (AIC(ModelCox4) - AIC_Frailty_Corrected > 4) 'meaningfully improved' else if (AIC(ModelCox4) - AIC_Frailty_Corrected > 0) 'marginally improved' else 'not improved'} by the inclusion of frailty (AIC: {round(AIC(ModelCox4), 2)} vs {round(AIC_Frailty_Corrected, 2)}; BIC: {round(BIC(ModelCox4), 2)} vs {round(BIC_Frailty_Corrected, 2)}).
 
 The estimated frailty variance was modest in absolute terms (θ = {round(Readmit_Frailty_Theta, 3)}; Kendall's τ ≈ {round(Readmit_Frailty_Tau, 3)}), but the χ² test for the frailty term reached conventional significance (χ² = {round(Readmit_Frailty_Chisq, 2)}, p = {round(Readmit_Frailty_P, 3)}), and both AIC and BIC favoured the frailty-adjusted model. The profile likelihood for θ was {if (Readmit_Frailty_LLRange < 0.5) 'flat' else 'well-distinguished'} across the final search iterations (Δc.loglik = {round(Readmit_Frailty_LLRange, 3)}), indicating that while the direction of evidence consistently favours non-zero surgeon-level heterogeneity, the precise magnitude of θ is weakly identified at this event count (~5.4 events per surgeon).
 
-Hazard ratios for Group were broadly similar between the primary and frailty-adjusted models for Pre-Robot ({round(exp(coef(ModelCox4)['Group1Pre-Robot']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Pre-Robot']), 2)}), but the Department hazard ratio shifted upward under frailty adjustment ({round(exp(coef(ModelCox4)['Group1Department']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Department']), 2)}). A cross-tabulation of Surgeon by Group1 showed that {round(Readmit_Department_Concentration * 100, 0)}% of Department readmission events were concentrated among two surgeons, indicating that Surgeon and Group are not cleanly separable within the Department arm. This shift in the Department hazard ratio is therefore better explained by entanglement between Surgeon and Group1 in this subset than by the frailty model revealing a more accurate causal estimate, and the frailty variance itself may partly reflect unmodelled Group-by-surgeon structure rather than surgeon-level heterogeneity in isolation. The primary (non-frailty) model is therefore retained as the reported analysis, with this sensitivity check presented as a bounded exploration of surgeon-level clustering rather than confirmatory evidence either for or against it.
+Hazard ratios for Group were broadly similar between the primary and frailty-adjusted models for Pre-RAS ({round(exp(coef(ModelCox4)['Group1Pre-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Pre-RAS']), 2)}), but the Non-RAS hazard ratio shifted upward under frailty adjustment ({round(exp(coef(ModelCox4)['Group1Non-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Non-RAS']), 2)}). A cross-tabulation of Surgeon by Group1 showed that {round(Readmit_NonRAS_Concentration * 100, 0)}% of Non-RAS readmission events were concentrated among two surgeons, indicating that Surgeon and Group are not cleanly separable within the Non-RAS arm. This shift in the Non-RAS hazard ratio is therefore better explained by entanglement between Surgeon and Group1 in this subset than by the frailty model revealing a more accurate causal estimate, and the frailty variance itself may partly reflect unmodelled Group-by-surgeon structure rather than surgeon-level heterogeneity in isolation. The primary (non-frailty) model is therefore retained as the reported analysis, with this sensitivity check presented as a bounded exploration of surgeon-level clustering rather than confirmatory evidence either for or against it.
 ```
 
 # Discussion:
@@ -5356,21 +5319,21 @@ The key results can be summarised as follows;
 The limitations of the analysis can be summarised in the table below and should be prioritised for inclusion in the manuscript. Further work may be required to draw on existing literature to strengthen the argument for impact and/or mitigation measures.
 
 ::: {#tbl-limitations}
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Component                      | Limitation                                                                                                                                                                                                                          | Impact                                                                                                                                                                                                                                  | Mitigation                                                                                                                                                                            |
-+================================+=====================================================================================================================================================================================================================================+=========================================================================================================================================================================================================================================+=======================================================================================================================================================================================+
-| Setting                        | Public hospital with highly variable surgeon group                                                                                                                                                                                  | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.                                                                                      | Temper language with respect to conclusions and causality of differences observed between Groups.                                                                                     |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Design                         | Retrospective cohort analysis with inherent biases                                                                                                                                                                                  | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                                                                                                  | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                                                     |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 1                         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches                                                                                                                      | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others.                                                                                | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed.                         |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 2                         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis                                                                                                        | The robot introduction could not be fully assessed for all adverse events.                                                                                                                                                              | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                                            |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Methods                        | Model fitting was challenging for some outcome measures and may need further refinement.                                                                                                                                            | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                                                                                                          | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                                        |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Methods (sensitivity analysis) | A post-hoc shared frailty sensitivity analysis for Surgeon (readmission outcome) found that Surgeon and Group1 were not cleanly separable within the Department arm, where two surgeons accounted for nearly all readmission events | The Department hazard ratio shifted under frailty adjustment in a way that reflects this entanglement rather than a more accurate causal estimate; the frailty variance itself may partly capture unmodelled Group-by-surgeon structure | Primary (non-frailty) model was retained as the reported analysis; the frailty model is presented as a sensitivity check, consistent with the existing surgeon-composition limitation |
-+--------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Component                      | Limitation                                                                                                                                                                                                                       | Impact                                                                                                                                                                                                                               | Mitigation                                                                                                                                                                            |
++================================+==================================================================================================================================================================================================================================+======================================================================================================================================================================================================================================+=======================================================================================================================================================================================+
+| Setting                        | Public hospital with highly variable surgeon group                                                                                                                                                                               | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.                                                                                   | Temper language with respect to conclusions and causality of differences observed between Groups.                                                                                     |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Design                         | Retrospective cohort analysis with inherent biases                                                                                                                                                                               | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                                                                                               | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                                                     |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 1                         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches                                                                                                                   | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others.                                                                             | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed.                         |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data 2                         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis                                                                                                     | The robot RAS introduction could not be fully assessed for all adverse events.                                                                                                                                                       | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                                            |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Methods                        | Model fitting was challenging for some outcome measures and may need further refinement.                                                                                                                                         | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                                                                                                       | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                                        |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Methods (sensitivity analysis) | A post-hoc shared frailty sensitivity analysis for Surgeon (readmission outcome) found that Surgeon and Group1 were not cleanly separable within the Non-RAS arm, where two surgeons accounted for nearly all readmission events | The Non-RAS hazard ratio shifted under frailty adjustment in a way that reflects this entanglement rather than a more accurate causal estimate; the frailty variance itself may partly capture unmodelled Group-by-surgeon structure | Primary (non-frailty) model was retained as the reported analysis; the frailty model is presented as a sensitivity check, consistent with the existing surgeon-composition limitation |
++--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Summary of key limitations of the presented analysis
 :::
@@ -5397,7 +5360,7 @@ The analysis design is also relatively novel with respect to the control groups 
 
 *Critically compare findings with previous research, assessing consistency and discrepancies.*
 
-The notes on generalisability above should be integrated into the literature comparison in place within the manuscript.
+The notes on generalisability above should be integrated into the literature comparison in place within the manuscript so far.
 
 # Ethical Considerations:
 
@@ -5437,12 +5400,12 @@ Author CS declares institutional funding (EBM Analytics) received for a project 
 
 *Critically assess whether conflicts of interest could have influenced the study design, analysis, or interpretation of results.*
 
-Conflicts of interest could be perceived to influence the analysis or interpretation of results. Some authors are conflicted by their relationship to the hospital and the department in which the Robot is installed, others have a perceived conflict with respect to competitor systems available in the local market. These conflicts have been declared in the context of the study submission and are available for readers to interpret.
+Conflicts of interest could be perceived to influence the analysis or interpretation of results. Some authors are conflicted by their relationship to the hospital and the department in which the RAS is installed, others have a perceived conflict with respect to competitor systems available in the local market. These conflicts have been declared in the context of the study submission and are available for readers to interpret.
 
 # References:
 
 *Evaluate the quality and relevance of cited references, including any potential biases or omissions.*
 
-No relevant commentary.
+No relevant commentary at this time.
 
 # Analysis References
