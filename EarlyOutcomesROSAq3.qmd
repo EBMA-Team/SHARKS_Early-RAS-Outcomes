@@ -25,18 +25,19 @@ execute:
   echo: true
   warning: false
   error: false
-bibliography: references.bib
 ---
 
 # Preamble
 
 **Author Affiliation:** EBM Analytics
 
-**Client \| Sponsor:** Lorenzo Calabro; Dept Orthopaedics, QEII Hospital
+**Client \| Sponsor:** \
+\
+Lorenzo Calabro; Dept Orthopaedics, QEII Hospital
 
 **EBMAReference**: Pub_Early_Outcomes_Robotic_Arthroplasty_CB048
 
-**Version:** 3.3
+**Version:** 4
 
 This analysis is a companion piece to the [manuscript](https://docs.google.com/document/d/1fQi6GebYPOwunt_OJrfVft7fGzUQ3A3Fu05ZsbTFLDk/edit?usp=sharing "Link to RAS manuscript draft") of the project. The analysis report has been organised as per the STROBE guidelines and checklist [@Vandenbroucke2007], as well as the IDEAL framework for surgical innovation [@Ergina2013]. The contents of the sections has been derived from the manuscript (partly completed at the time of drafting), the [protocol](https://drive.google.com/file/d/15XY0UEf0YYIWuJhtPWUDXbBLfwnKZAOr/view?usp=sharing "Early RAS HREC protocol - approved") approved by the local health district HREC 13-Jun-2023, as well as an earlier [study viability report](https://docs.google.com/presentation/d/1cj4_lGa0OhAg25rQvJh1M1d_UirlHdb6Y9L7pL1IaSc/edit?usp=sharing "Early RAS study viability report"), and the results of the analysis, where appropriate. The analysis was generated using `{r} R.Version()$version.string` in RStudio (v2024.04.0 Build 735) with appropriate specialised packages as required. Code and text were combined within the report using the `epoxy` package.
 
@@ -1211,7 +1212,7 @@ as_flex_table(Table3) |> flextable::set_table_properties(
   )
 ```
 
-Following chart review, inconsistencies in group labels were resolved by retrieving the alignment reference method and comparing the presence of the record in the vendor report. 
+Following chart review, inconsistencies in group labels were resolved by retrieving the alignment reference method and comparing the presence of the record in the vendor report.
 
 ```{r}
 
@@ -3926,13 +3927,11 @@ knitr::knit_print(DeliveryComp)
 
 ### Procedure Duration
 
-The residual fits and leverage points for the gamma regression were outside acceptable patterns (see STROBE 17 for further details). The model appeared to suffer from non-linear patterns of residuals, heteroscedasticity and outliers (Figures 17 and 18). Further work may be required to refine the model further to establish a better fit to the observed data.
-
 ```{r}
 #| label: fig-duration
 #| fig-cap: "Summary of gamma regression residuals for procedure duration."
 
-# Assuming Duration_model is your linear model
+
 model_data <- data.frame(
   fitted = fitted(Duration_model),
   residuals = resid(Duration_model)
@@ -3989,6 +3988,8 @@ Durationp2 <- ggplot(data.frame(x = qq_data$x, y = qq_data$y), aes(x = x, y = y)
 knitr::knit_print(Durationp2)
 ```
 
+The residual fits and leverage points for the gamma regression were outside acceptable patterns (see STROBE 17 for further details). The model appeared to suffer from non-linear patterns of residuals, heteroscedasticity and outliers (@fig-duration and @fig-duration2). Further work may be required to refine the model further to establish a better fit to the observed data.
+
 ```{r}
 #| label: tbl-durationmodel
 #| tbl-cap: "Summary of gamma regression model to assess the effect of Group on procedure duration"
@@ -4011,6 +4012,8 @@ as_flex_table(TableDuration) |> flextable::set_table_properties(
   )
 ```
 
+The model identified a significant difference in procedure duration between the RAS and Pre-RAS groups, but not the Non-RAS group ( @tbl-durationmodel).
+
 ```{r}
 #marginaleffects package
 
@@ -4026,16 +4029,52 @@ DurationPredict <- marginaleffects::predictions(
 #| label: fig-duration-predict
 #| fig-cap: "Distribution of model-predicted procedure duration separated by Group."
 
-DurationFig <- ggplot(data = DurationPredict, mapping = aes(y = Group1, x = ProcedureDuration)) +
-  stat_slab(aes(thickness = after_stat(pdf*n)), scale = 0.7) +
-  stat_dotsinterval(side = "bottom", scale = 0.7, slab_linewidth = NA) +
-  #scale_fill_brewer(palette = "Set2") +
-  ggtitle('Model Predicted Procedure Duration by Group')
+DurationFig <- ggplot() +
+  stat_slab(
+    data = DurationPredict,
+    mapping = aes(y = Group1, x = ProcedureDuration,
+                  thickness = after_stat(pdf * n), fill = "Predicted"),
+    side = "top", scale = 0.7, alpha = 0.7
+  ) +
+  stat_slab(
+    data = DurationObserved,
+    mapping = aes(y = Group1, x = ProcedureDuration,
+                  thickness = after_stat(pdf * n), fill = "Observed"),
+    side = "bottom", scale = 0.7, alpha = 0.7
+  ) +
+  stat_dotsinterval(
+    data = DurationObserved,
+    mapping = aes(y = Group1, x = ProcedureDuration,
+                  fill = "Observed", colour = "Observed"),
+    side = "bottom", scale = 0.7, slab_linewidth = NA
+  ) +
+  scale_fill_manual(name = "Data source", values = c(Predicted = "#3182bd", Observed = "#de2d26")) +
+  scale_colour_manual(name = "Data source", values = c(Predicted = "#3182bd", Observed = "#de2d26")) +
+  guides(colour = "none")
 
 knitr::knit_print(DurationFig)
 ```
 
-The model-predicted procedure duration conformed with the patterns visualised using the observed data @fig-duration-predict .
+```{r}
+
+# --- Step 2: complete-case observed dataset ---
+DurationObserved <- MasterSheet6 |>
+  select(Group1, ProcedureDuration) |>
+  tidyr::drop_na()
+
+epoxy::epoxy(
+  "Complete-case observed n = {nrow(DurationObserved)} of {nrow(MasterSheet6)} total rows in MasterSheet6."
+)
+
+
+
+```
+
+```{r}
+
+```
+
+The model-predicted procedure duration @fig-duration-predict conformed with the patterns from the observed data, including the extreme values.
 
 ```{r}
 #| label: tbl-duration-posthoc
@@ -4088,7 +4127,7 @@ knitr::knit_print(TableDurationSum)
 
 ```{epoxy}
 
-The beta coefficient for the Department compared to the Robot group {gtsummary::inline_text(TableDuration, variable = Group1, level = "Non-RAS",
+The beta coefficient for the Non-RAS compared to the RAS group {gtsummary::inline_text(TableDuration, variable = Group1, level = "Non-RAS",
             pattern = "{estimate} (95% CI {conf.low} - {conf.high}],{p.value})")} was not significant. Similarly, cases with a unilateral procedure were not significantly shorter than bilateral, {gtsummary::inline_text(TableDuration, variable = BilateralStatus,
             pattern = "{estimate} (95% CI {conf.low} - {conf.high}),{p.value})")}.
 This translated to an increase of {abs(round(DurationPost$`_data`$estimate[2],1))} minutes ({abs(round(DurationPost$`_data`$conf.high[2],1))} - {abs(round(DurationPost$`_data`$conf.low[2],1))}, p = {round(DurationPost$`_data`$p.value[2],3)}) for RAS cases compared to Non-RAS. 
@@ -4163,7 +4202,7 @@ as_flex_table(TableCov) |> flextable::set_table_properties(
   )
 ```
 
-An important assumption for Cox proportional hazards models is that the hazard function for each Group remains proportional to the other Groups over the follow up period [@kuitunen2021]. The assumption was assessed using a score test calculated in the *survival* package.
+An important assumption for Cox proportional hazards models is that the hazard function for each Group remains proportional to the other Groups over the follow up period [@kuitunen2021]. The assumption was assessed using a score test calculated in the `survival` package.
 
 ```{r}
 #| label: tbl-adverse-ph
@@ -4235,8 +4274,6 @@ as_flex_table(ph_summary_table) |> flextable::set_table_properties(
 
 
 ```
-
-The adjusted models revealed no significant effect of Group on any incidence of SSI, VTE, stiffness or all-cause readmission after total knee arthroplasty in the first 90 days after surgery (Table 24).
 
 ```{r}
 #| label: tbl-adverse-coxph
@@ -4325,6 +4362,8 @@ as_flex_table(TableCox) |> flextable::set_table_properties(
   )
 ```
 
+The adjusted models revealed no significant effect of Group on any incidence of SSI, VTE, stiffness or all-cause readmission after total knee arthroplasty in the first 90 days after surgery (@tbl-adverse-coxph).
+
 ```{r}
 #| label: fig-adverse-coxph
 #| fig-cap: "Summary of adjusted cox proportional hazards models for SSI (Left) and VTE (Right)"
@@ -4399,11 +4438,13 @@ FigureCox4 <- ggplot(tidy_cox4, aes(x = term, y = estimate, ymin = conf.low, yma
 patchwork::wrap_plots(FigureCox1,FigureCox2)
 ```
 
+Visualisation of the coefficients and confidence intervals for fixed effects (superficial infection, thromboembolism) showed overlap with zero and substantial variability (@fig-adverse-coxph).
+
 ```{r}
 #| label: fig-bmi-spline
 #| fig-cap: "Relationship between penalised spline of body mass index on all-cause readmission risk."
 
-# Assume ModelCox1 is your Cox model
+
 ptemp <- termplot(ModelCox4, se = TRUE, plot = FALSE)
 attributes(ptemp)
 
@@ -4438,6 +4479,7 @@ knitr::knit_print(FigureCox1)
 ```
 
 ```{r}
+#| label: model-main-coxph
 #| warning: false
 
 
@@ -4966,7 +5008,11 @@ var_decomp_table <- var_decomp |>
 knitr::knit_print(var_decomp_table)
 ```
 
-Surgeon as a factor in the expanded model is attributed to \<4% of the total variance within the model ( @tbl-variance-decomp).
+```{epoxy}
+#| label: variance-decomp-summary
+
+Surgeon as a factor in the expanded model is attributed to {scales::label_percent(accuracy = 0.1)(icc_surgeon)} of the total variance within the model (@tbl-variance-decomp).
+```
 
 ```{r}
 #| label: fig-var-decomp
