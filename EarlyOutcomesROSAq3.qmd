@@ -902,39 +902,23 @@ The initial consolidated case list was re-imported back into R and reprocessed a
 The mastersheetv3 was split into separate tables for further chart review by the authors.
 
 ::: {#tbl-chartreview}
-+---------------------+------------------------------+----------------------+
 |                     |                              |                      |
-+=====================+==============================+======================+
+|---------------------|------------------------------|----------------------|
 | **Patient Details** | **Surgical 1**               | **Surgical 2**       |
-+---------------------+------------------------------+----------------------+
 | ProgressIndicator   | Surgeon                      | Pathology            |
-+---------------------+------------------------------+----------------------+
 | ProgressComment     | SurgerySide                  | AlignmentReferencing |
-+---------------------+------------------------------+----------------------+
 | ComplicationForm    | Group                        | SoftTissueRelease    |
-+---------------------+------------------------------+----------------------+
 | Height              | BilateralStatus              | FemurBrand           |
-+---------------------+------------------------------+----------------------+
 | Weight              | SimultaneousBilateralSurgery | FemurFixation        |
-+---------------------+------------------------------+----------------------+
 | Comorbidities       | Surgery_ProcedureName        | FemoralSize          |
-+---------------------+------------------------------+----------------------+
 | DateOfInitialExam   | Operator                     | TibiaBrand           |
-+---------------------+------------------------------+----------------------+
 | PatientID           | Approach                     | TibiaFixation        |
-+---------------------+------------------------------+----------------------+
 | MockUpID            | Anaesthetic                  | TibialSize           |
-+---------------------+------------------------------+----------------------+
 | SurgeryDate         | TourniquetType               | InsertThickness      |
-+---------------------+------------------------------+----------------------+
 | Sex                 | Operation Start Time         | PatellaIntervention  |
-+---------------------+------------------------------+----------------------+
 | DateofBirth         | Operation Finish Time        | PatellaType          |
-+---------------------+------------------------------+----------------------+
 |                     |                              | PatellaSize          |
-+---------------------+------------------------------+----------------------+
 |                     |                              | Constraint           |
-+---------------------+------------------------------+----------------------+
 
 Chart Review Variables Group Pre-RAS and Non-RAS
 :::
@@ -3190,19 +3174,19 @@ knitr::knit_print(Figure11)
 A literature review revealed a recent meta-analysis [@tibbo2019] of 35 cohort studies (48873 TKAs) and an incidence of 4% at up to 12 weeks postoperatively. There was insufficient evidence to determine the relationship between diabetes and smoking status on stiffness risk. A more recent cohort study [@owen2021] of 12735 cases also observed an incidence of 3.6% A summary of factors associated with postoperative stiffness is summarised below.
 
 ::: {#tbl-adust-stiffness}
-+--------------+--------------+----------------------------+
-| Variable     | Source       | Present in current dataset |
-+==============+==============+============================+
-| Sex          | Tibbo et al  | ✅                         |
-+--------------+--------------+----------------------------+
-| Age          | Tibbo et al  | ✅                         |
-|              |              |                            |
-|              | Owen et al   |                            |
-+--------------+--------------+----------------------------+
-| BMI          | Tibbo et al  | ✅                         |
-+--------------+--------------+----------------------------+
-| Diabetes     | Owen et al   | ✅                         |
-+--------------+--------------+----------------------------+
++----------+-------------+----------------------------+
+| Variable | Source      | Present in current dataset |
++==========+=============+============================+
+| Sex      | Tibbo et al | ✅                         |
++----------+-------------+----------------------------+
+| Age      | Tibbo et al | ✅                         |
+|          |             |                            |
+|          | Owen et al  |                            |
++----------+-------------+----------------------------+
+| BMI      | Tibbo et al | ✅                         |
++----------+-------------+----------------------------+
+| Diabetes | Owen et al  | ✅                         |
++----------+-------------+----------------------------+
 
 Summmary of potential factors associated with **stiffness** after total knee arthroplasty.
 :::
@@ -5319,21 +5303,14 @@ The key results can be summarised as follows;
 The limitations of the analysis can be summarised in the table below and should be prioritised for inclusion in the manuscript. Further work may be required to draw on existing literature to strengthen the argument for impact and/or mitigation measures.
 
 ::: {#tbl-limitations}
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Component                      | Limitation                                                                                                                                                                                                                       | Impact                                                                                                                                                                                                                               | Mitigation                                                                                                                                                                            |
-+================================+==================================================================================================================================================================================================================================+======================================================================================================================================================================================================================================+=======================================================================================================================================================================================+
-| Setting                        | Public hospital with highly variable surgeon group                                                                                                                                                                               | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment.                                                                                   | Temper language with respect to conclusions and causality of differences observed between Groups.                                                                                     |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Design                         | Retrospective cohort analysis with inherent biases                                                                                                                                                                               | Information bias may change the distribution of outcomes between groups and lead to misleading results                                                                                                                               | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately.                                                                     |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 1                         | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches                                                                                                                   | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others.                                                                             | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed.                         |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Data 2                         | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis                                                                                                     | The robot RAS introduction could not be fully assessed for all adverse events.                                                                                                                                                       | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period.                                            |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Methods                        | Model fitting was challenging for some outcome measures and may need further refinement.                                                                                                                                         | The procedure duration model in particular may present erroneous results and should be interpreted cautiously.                                                                                                                       | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work.                                                        |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Component | Limitation | Impact | Mitigation |
+|----|----|----|----|
+| Setting | Public hospital with highly variable surgeon group | Variability in perioperative management and detection \| reporting of adverse events. Limit ability to attribute observations to Group assignment. | Temper language with respect to conclusions and causality of differences observed between Groups. |
+| Design | Retrospective cohort analysis with inherent biases | Information bias may change the distribution of outcomes between groups and lead to misleading results | Restrict dataset to cases that could be verified and with sufficient information to assign to a Group accurately. |
+| Data 1 | Issues with retrieving hospital data created gaps in the timeline and difficulties with verifying case matches | Increased the rejection rate within the data pool. Considering the temporal nature of the omissions it may have impacted one group more than the others. | The overall sample seems sufficient for adequately powered comparison between groups. However, bias with respect to generalisability cannot be fully removed. |
+| Data 2 | Clinical flow and population returned few events for certain adverse categories, limiting the capacity for adjusted analysis | The robot RAS introduction could not be fully assessed for all adverse events. | Future work should consider multi-state models to assess incidence of transition between adverse event states across the follow up period. |
+| Methods | Model fitting was challenging for some outcome measures and may need further refinement. | The procedure duration model in particular may present erroneous results and should be interpreted cautiously. | Further refinement of models comparing procedure duration in this context and population should be prioritised in future work. |
 | Methods (sensitivity analysis) | A post-hoc shared frailty sensitivity analysis for Surgeon (readmission outcome) found that Surgeon and Group1 were not cleanly separable within the Non-RAS arm, where two surgeons accounted for nearly all readmission events | The Non-RAS hazard ratio shifted under frailty adjustment in a way that reflects this entanglement rather than a more accurate causal estimate; the frailty variance itself may partly capture unmodelled Group-by-surgeon structure | Primary (non-frailty) model was retained as the reported analysis; the frailty model is presented as a sensitivity check, consistent with the existing surgeon-composition limitation |
-+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Summary of key limitations of the presented analysis
 :::
