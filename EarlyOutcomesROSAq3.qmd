@@ -4023,6 +4023,10 @@ DurationPredict <- marginaleffects::predictions(
   type = "response",
   conf_level = 0.95)
 
+DurationObserved <- MasterSheet6 |>
+  select(Group1, ProcedureDuration) |>
+  tidyr::drop_na()
+
 ```
 
 ```{r}
