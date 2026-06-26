@@ -1420,7 +1420,7 @@ Following chart review 1, further processing was performed to confirm the groupi
 
 - Assess availabilty of complications data
 
-The initial state of the grouping variables was tabled using *gtsummary* (v`{r} utils::packageVersion("gtsummary")`) [@gtsummary] to ensure that the patterns were as expected.
+The initial state of the grouping variables was tabled using `gtsummary` to ensure that the patterns were as expected.
 
 ```{r}
 #| label: tbl-groupinputs
@@ -1498,15 +1498,14 @@ Operator2 = case_when(
   .default = NA_character_
 ),
 Anaesthetic2 = case_when(
-  str_detect(Anaesthetic,"\\bGa\\b") ~ str_replace(Anaesthetic,"\\bGa\\b","General"),
-  str_detect(Anaesthetic,"Spinal, Ga") ~ str_replace(Anaesthetic,"Spinal, Ga","General, Spinal"),
-  str_detect(Anaesthetic,"Spnial") ~ str_replace(Anaesthetic,"Spnial","Spinal"),
-  str_detect(Anaesthetic,"Spinal \\+ Sedation") ~ str_replace(Anaesthetic,"Spinal \\+ Sedation","Spinal, Sedation"),
+  str_detect(Anaesthetic, "Spinal \\+ Sedation") ~ str_replace(Anaesthetic, "Spinal \\+ Sedation", "Spinal, Sedation"),
+  str_detect(Anaesthetic, "Spnial")               ~ str_replace(Anaesthetic, "Spnial", "Spinal"),
+  str_detect(Anaesthetic, "\\bGa\\b")             ~ str_replace(Anaesthetic, "\\bGa\\b", "General"),
   .default = Anaesthetic
 ),
 Anaesthetic3 = case_when(
-  str_detect(Anaesthetic2,"Spinal, General") ~ str_replace(Anaesthetic,"Spinal, General","General, Spinal"),
-  str_detect(Anaesthetic2,"Spinal, Regional, General") ~ str_replace(Anaesthetic,"Spinal, Regional, General","General, Regional Block, Spinal"),
+  str_detect(Anaesthetic2, "Spinal, General")          ~ str_replace(Anaesthetic2, "Spinal, General", "General, Spinal"),
+  str_detect(Anaesthetic2, "Spinal, Regional, General") ~ str_replace(Anaesthetic2, "Spinal, Regional, General", "General, Regional Block, Spinal"),
   .default = Anaesthetic2
 ),
 TourniquetType2 = case_when(
@@ -1619,7 +1618,14 @@ Table6 <- tbl_summary(
     FemurBrand2 ~ "Femur Brand",
     FemurFixation2 ~ "Femur Fixation",
     TibiaFixation2 ~ "Tibia Fixation",
-    Constraint2 ~ "Prosthesis Constraint"
+    Constraint2 ~ "Prosthesis Constraint",
+    PatellaIntervention ~ "Patella Resurfaced"
+  ),
+  type = list(
+    PatellaIntervention ~ "dichotomous"
+  ),
+  value = list(
+    PatellaIntervention ~ "Resurfaced" 
   ),
   by = GroupCorrected
 ) |> add_overall()
@@ -3846,14 +3852,24 @@ plot(ConsortPlot)
 *Evaluate the adequacy of the presentation of characteristics of the study population.*
 
 ```{r}
-#| label: tbl-strobeflow
+#| label: tbl-patientchar
 #| tbl-cap: "Patient characteristics of analysis sample separated by Group."
 
 TableChar <- tbl_summary(
   MasterSheet6 |> dplyr::select(
     Group1,
-    Sex:ComorbidCancer,
-    BilateralStatus2
+    Sex,
+    AgeAtSurgery,
+    BMI,
+    ComorbidBone,
+    ComorbidAutoImmune,
+    ComorbidCancer,
+    ComorbidCardiovascular,
+    ComorbidDiabetes,
+    ComorbidNeuro,
+    BilateralStatus,
+    
+    
   ),
   by = Group1,
    missing = "no"
@@ -3869,6 +3885,64 @@ as_flex_table(TableChar) |> flextable::set_table_properties(
   )
 
 ```
+
+```{r}
+#| label: tbl-surgicalmain
+#| tbl-cap: "Surgery characteristics of analysis sample separated by Group."
+
+TableSurgMain <- tbl_summary(
+  MasterSheet6 |> dplyr::select(
+    SurgerySide,
+    Group1,
+    BilateralStatus2,
+    Surgery_ProcedureName,
+    Operator2,
+    Approach2,
+    SoftTissueRelease,
+    Anaesthetic3,
+    TourniquetType2,
+    Pathology,
+    AlignmentReferencing,
+    SoftTissueRelease,
+    FemurBrand2,
+    FemurFixation2,
+    TibiaFixation2,
+    PatellaIntervention,
+    Constraint2
+  ),
+  label = list(
+    BilateralStatus2 ~ "Bilateral Status",
+    Operator2 ~ "Operator",
+    Approach2 ~ "Approach",
+    Anaesthetic3 ~ "Anaesthetic",
+    TourniquetType2 ~ "Tourniquet Use",
+    FemurBrand2 ~ "Femur Brand",
+    FemurFixation2 ~ "Femur Fixation",
+    TibiaFixation2 ~ "Tibia Fixation",
+    Constraint2 ~ "Prosthesis Constraint",
+    PatellaIntervention ~ "Patella Resurfaced"
+  ),
+  type = list(
+    PatellaIntervention ~ "dichotomous"
+  ),
+  value = list(
+    PatellaIntervention ~ "Resurfaced" 
+  ),
+  by = Group1
+) |> add_overall()
+
+as_flex_table(Table6) |> flextable::set_table_properties(
+  layout = "autofit",
+  width = 0.15,
+  align = "center",
+  opts_word = list(
+    split = TRUE
+    )
+  )
+
+
+```
+
 
 ## STROBE \[15\] Outcome Data:
 
@@ -5348,12 +5422,16 @@ Readmit_NonRAS_Concentration <- Readmit_NonRAS_Top2 / Readmit_NonRAS_Total
 ```{epoxy}
 #| label: readmit-summary
 
+
+
 A shared gamma frailty term for Surgeon was added to the primary readmission model. Model fit was {if (AIC(ModelCox4) - AIC_Frailty_Corrected > 4) 'meaningfully improved' else if (AIC(ModelCox4) - AIC_Frailty_Corrected > 0) 'marginally improved' else 'not improved'} by the inclusion of frailty (AIC: {round(AIC(ModelCox4), 2)} vs {round(AIC_Frailty_Corrected, 2)}; BIC: {round(BIC(ModelCox4), 2)} vs {round(BIC_Frailty_Corrected, 2)}).
 
 The estimated frailty variance was modest in absolute terms (θ = {round(Readmit_Frailty_Theta, 3)}; Kendall's τ ≈ {round(Readmit_Frailty_Tau, 3)}), but the χ² test for the frailty term reached conventional significance (χ² = {round(Readmit_Frailty_Chisq, 2)}, p = {round(Readmit_Frailty_P, 3)}), and both AIC and BIC favoured the frailty-adjusted model. The profile likelihood for θ was {if (Readmit_Frailty_LLRange < 0.5) 'flat' else 'well-distinguished'} across the final search iterations (Δc.loglik = {round(Readmit_Frailty_LLRange, 3)}), indicating that while the direction of evidence consistently favours non-zero surgeon-level heterogeneity, the precise magnitude of θ is weakly identified at this event count (~5.4 events per surgeon).
 
 Hazard ratios for Group were broadly similar between the primary and frailty-adjusted models for Pre-RAS ({round(exp(coef(ModelCox4)['Group1Pre-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Pre-RAS']), 2)}), but the Non-RAS hazard ratio shifted upward under frailty adjustment ({round(exp(coef(ModelCox4)['Group1Non-RAS']), 2)} vs {round(exp(coef(ModelCox4_Frailty)['Group1Non-RAS']), 2)}). A cross-tabulation of Surgeon by Group1 showed that {round(Readmit_NonRAS_Concentration * 100, 0)}% of Non-RAS readmission events were concentrated among two surgeons, indicating that Surgeon and Group are not cleanly separable within the Non-RAS arm. This shift in the Non-RAS hazard ratio is therefore better explained by entanglement between Surgeon and Group1 in this subset than by the frailty model revealing a more accurate causal estimate, and the frailty variance itself may partly reflect unmodelled Group-by-surgeon structure rather than surgeon-level heterogeneity in isolation. The primary (non-frailty) model is therefore retained as the reported analysis, with this sensitivity check presented as a bounded exploration of surgeon-level clustering rather than confirmatory evidence either for or against it.
 ```
+
+On this basis, the primary (non-frailty) Cox model is retained as the reported analysis for readmission, and the frailty-adjusted model is presented here as a bounded exploratory sensitivity check rather than as confirmatory evidence either for or against surgeon-level confounding. Unlike the corresponding analysis for procedure duration, this sensitivity check does not rule out that surgeon-level clustering is completely irrelevant. Instead, it identifies a specific, localised source of potential confounding within the Non-RAS comparison that should be considered a limitation when interpreting that comparison.
 
 # Discussion:
 
